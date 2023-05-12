@@ -1,6 +1,6 @@
 package de.samply.qualityreportgenerator.exporter;
 
-import de.samply.qualityreportgenerator.QrgConst;
+import de.samply.qualityreportgenerator.app.QrgConst;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -38,8 +38,7 @@ public class ExporterClient {
   private final int maxNumberOfAttemptsToGetExport;
   private final int timeInSecondsToWaitBetweenAttemptsToGetExport;
 
-  public ExporterClient(
-      @Value(QrgConst.EXPORTER_URL_SV) String exporterUrl,
+  public ExporterClient(@Value(QrgConst.EXPORTER_URL_SV) String exporterUrl,
       @Value(QrgConst.EXPORTER_API_KEY_SV) String exporterApiKey,
       @Value(QrgConst.EXPORTER_QUERY_SV) String exporterQuery,
       @Value(QrgConst.EXPORTER_QUERY_FORMAT_SV) String exporterQueryFormat,
@@ -47,8 +46,7 @@ public class ExporterClient {
       @Value(QrgConst.EXPORTER_OUTPUT_FORMAT_SV) String exporterOutputFormat,
       @Value(QrgConst.TEMP_FILES_DIRECTORY_SV) String tempFilesDirectory,
       @Value(QrgConst.MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT_SV) Integer maxNumberOfAttemptsToGetExport,
-      @Value(QrgConst.TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV) Integer timeInSecondsToWaitBetweenAttemptsToGetExport
-  ) {
+      @Value(QrgConst.TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV) Integer timeInSecondsToWaitBetweenAttemptsToGetExport) {
     this.webClient = WebClient.builder().baseUrl(exporterUrl).build();
     this.exporterApiKey = exporterApiKey;
     this.exporterQuery = exporterQuery;
@@ -62,17 +60,14 @@ public class ExporterClient {
 
   public void fetchExportFiles(Consumer<String> exportFilePathConsumer)
       throws ExporterClientException {
-    RequestResponseEntity requestResponseEntity = webClient.post().uri(uriBuilder -> uriBuilder
-            .path(QrgConst.EXPORTER_REQUEST)
-            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporterQuery)
-            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporterQueryFormat)
-            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID, exporterTemplateId)
-            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporterOutputFormat)
-            .build())
-        .header(QrgConst.HTTP_HEADER_API_KEY, exporterApiKey)
-        .retrieve()
-        .bodyToMono(RequestResponseEntity.class)
-        .block();
+    RequestResponseEntity requestResponseEntity = webClient.post().uri(
+            uriBuilder -> uriBuilder.path(QrgConst.EXPORTER_REQUEST)
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporterQuery)
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporterQueryFormat)
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID, exporterTemplateId)
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporterOutputFormat)
+                .build()).header(QrgConst.HTTP_HEADER_API_KEY, exporterApiKey).retrieve()
+        .bodyToMono(RequestResponseEntity.class).block();
     fetchExportFiles(requestResponseEntity, exportFilePathConsumer);
   }
 
@@ -101,10 +96,9 @@ public class ExporterClient {
           if (clientResponse.statusCode().is2xxSuccessful()) {
             if (!HttpStatus.OK.equals(clientResponse.statusCode())) {
               waitUntilNextAttempt();
-              return (counter.decrementAndGet() >= 0) ?
-                  fetchExportFiles(exportFilesUrl, counter, filePath) :
-                  Mono.error(new ExporterClientException(
-                      "Export file not ready after max number of attempts"));
+              return (counter.decrementAndGet() >= 0) ? fetchExportFiles(exportFilesUrl, counter,
+                  filePath) : Mono.error(new ExporterClientException(
+                  "Export file not ready after max number of attempts"));
             } else {
               filePath.set(fetchFilePath(fetchFilename(clientResponse)));
               return clientResponse.bodyToMono(byte[].class);
@@ -125,8 +119,7 @@ public class ExporterClient {
   }
 
   private String fetchFilename(ClientResponse clientResponse) {
-    List<String> header = clientResponse.headers()
-        .header(QrgConst.HTTP_HEADER_CONTENT_DISPOSITION);
+    List<String> header = clientResponse.headers().header(QrgConst.HTTP_HEADER_CONTENT_DISPOSITION);
     return (header != null && header.size() > 0) ? fetchFilenameFromHeader(header.get(0))
         : fetchRandomFilename();
 
@@ -134,10 +127,9 @@ public class ExporterClient {
 
   private String fetchFilenameFromHeader(String headerField) {
     return (headerField != null && headerField.contains(
-        QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME)) ?
-        headerField.substring(
-            headerField.indexOf(QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME)
-                + QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME.length())
+        QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME)) ? headerField.substring(
+        headerField.indexOf(QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME)
+            + QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME.length()).replace("\"", "")
         : fetchRandomFilename();
   }
 
@@ -150,10 +142,8 @@ public class ExporterClient {
   }
 
   private void copyInputStreamToFilePath(InputStream inputStream, String filePath) {
-    try (
-        ReadableByteChannel readableByteChannel = Channels.newChannel(inputStream);
-        FileOutputStream fileOutputStream = new FileOutputStream(filePath)
-    ) {
+    try (ReadableByteChannel readableByteChannel = Channels.newChannel(
+        inputStream); FileOutputStream fileOutputStream = new FileOutputStream(filePath)) {
       fileOutputStream.getChannel().transferFrom(readableByteChannel, 0, Long.MAX_VALUE);
     } catch (IOException e) {
       throw new RuntimeException(e);

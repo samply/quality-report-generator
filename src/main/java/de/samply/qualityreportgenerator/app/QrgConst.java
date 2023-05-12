@@ -1,4 +1,4 @@
-package de.samply.qualityreportgenerator;
+package de.samply.qualityreportgenerator.app;
 
 public class QrgConst {
 
@@ -58,7 +58,7 @@ public class QrgConst {
 
   // Other variables:
   public static final String HTTP_HEADER_CONTENT_DISPOSITION = "Content-Disposition";
-  public static final String HTTP_HEADER_CONTENT_DISPOSITION_FILENAME = "filename=\"";
+  public static final String HTTP_HEADER_CONTENT_DISPOSITION_FILENAME = "filename=";
   public static final int RANDOM_FILENAME_SIZE = 10;
   public static final String APP_NAME = "Quality Report Generator";
 

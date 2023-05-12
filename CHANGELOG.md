@@ -11,3 +11,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - build.yml
 - Dockerfile
 - Exporter Client
+- Download export

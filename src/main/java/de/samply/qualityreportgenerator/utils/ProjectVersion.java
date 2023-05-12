@@ -1,6 +1,6 @@
 package de.samply.qualityreportgenerator.utils;
 
-import de.samply.qualityreportgenerator.QrgConst;
+import de.samply.qualityreportgenerator.app.QrgConst;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;

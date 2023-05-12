@@ -1,5 +1,7 @@
-package de.samply.qualityreportgenerator;
+package de.samply.qualityreportgenerator.app;
 
+import de.samply.qualityreportgenerator.report.QualityReportGenerator;
+import de.samply.qualityreportgenerator.report.QualityReportGeneratorException;
 import de.samply.qualityreportgenerator.utils.ProjectVersion;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class QrgController {
 
   private final String projectVersion = ProjectVersion.getProjectVersion();
+  private QualityReportGenerator qualityReportGenerator;
+
+  public QrgController(QualityReportGenerator qualityReportGenerator) {
+    this.qualityReportGenerator = qualityReportGenerator;
+  }
 
   //@CrossOrigin(origins = "${CROSS_ORIGINS}", allowedHeaders = {"Authorization"})
   @GetMapping(value = QrgConst.INFO)
@@ -18,8 +25,8 @@ public class QrgController {
   }
 
   @GetMapping(value = QrgConst.GENERATE)
-  public ResponseEntity<String> generate() {
-
+  public ResponseEntity<String> generate() throws QualityReportGeneratorException {
+    qualityReportGenerator.generate();
     return new ResponseEntity<>("Hello World!", HttpStatus.OK);
   }
 
