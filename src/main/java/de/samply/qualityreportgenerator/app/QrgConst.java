@@ -47,13 +47,13 @@ public class QrgConst {
   public final static String EXPORTER_OUTPUT_FORMAT_SV =
       HEAD_SV + EXPORTER_OUTPUT_FORMAT + ":CSV" + BOTTOM_SV;
   public final static String TEMP_FILES_DIRECTORY_SV =
-      HEAD_SV + TEMP_FILES_DIRECTORY + ":temp-files" + BOTTOM_SV;
+      HEAD_SV + TEMP_FILES_DIRECTORY + ":./temp-files" + BOTTOM_SV;
   public final static String QUALITY_REPORTS_DIRECTORY_SV =
-      HEAD_SV + QUALITY_REPORTS_DIRECTORY + ":quality-reports" + BOTTOM_SV;
+      HEAD_SV + QUALITY_REPORTS_DIRECTORY + ":./quality-reports" + BOTTOM_SV;
   public final static String MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT_SV =
-      HEAD_SV + MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT + ":200" + BOTTOM_SV;
+      HEAD_SV + MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT + ":600" + BOTTOM_SV;
   public final static String TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV =
-      HEAD_SV + TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT + ":60" + BOTTOM_SV;
+      HEAD_SV + TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT + ":20" + BOTTOM_SV;
 
 
   // Other variables:
@@ -61,5 +61,6 @@ public class QrgConst {
   public static final String HTTP_HEADER_CONTENT_DISPOSITION_FILENAME = "filename=";
   public static final int RANDOM_FILENAME_SIZE = 10;
   public static final String APP_NAME = "Quality Report Generator";
+  public static final String TEMP_DIRECTORY_PREFIX = "TEMP_";
 
 }

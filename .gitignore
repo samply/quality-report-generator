@@ -6,6 +6,7 @@ target/
 .mvn
 temp-files
 qualit-reports
+test-files
 
 ### STS ###
 .apt_generated

@@ -60,6 +60,7 @@ public class ExporterClient {
 
   public void fetchExportFiles(Consumer<String> exportFilePathConsumer)
       throws ExporterClientException {
+    logger.info("Sending request to exporter...");
     RequestResponseEntity requestResponseEntity = webClient.post().uri(
             uriBuilder -> uriBuilder.path(QrgConst.EXPORTER_REQUEST)
                 .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporterQuery)
@@ -91,6 +92,8 @@ public class ExporterClient {
 
   private Mono<byte[]> fetchExportFiles(String exportFilesUrl, AtomicInteger counter,
       AtomicReference<String> filePath) {
+    logger.info("Fetching export... (Attempt: " + (
+        maxNumberOfAttemptsToGetExport - counter.get() + 1) + ")");
     return WebClient.builder().baseUrl(exportFilesUrl).build().get()
         .exchangeToMono(clientResponse -> {
           if (clientResponse.statusCode().is2xxSuccessful()) {
@@ -100,6 +103,7 @@ public class ExporterClient {
                   filePath) : Mono.error(new ExporterClientException(
                   "Export file not ready after max number of attempts"));
             } else {
+              logger.info("Export available. Downloading...");
               filePath.set(fetchFilePath(fetchFilename(clientResponse)));
               return clientResponse.bodyToMono(byte[].class);
             }
