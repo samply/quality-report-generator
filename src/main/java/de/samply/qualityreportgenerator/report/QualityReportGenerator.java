@@ -3,14 +3,14 @@ package de.samply.qualityreportgenerator.report;
 import de.samply.qualityreportgenerator.app.QrgConst;
 import de.samply.qualityreportgenerator.exporter.ExporterClient;
 import de.samply.qualityreportgenerator.exporter.ExporterClientException;
+import de.samply.qualityreportgenerator.template.QualityReportTemplate;
+import de.samply.qualityreportgenerator.template.QualityReportTemplateManager;
+import de.samply.qualityreportgenerator.utils.VariablesReplacer;
 import de.samply.qualityreportgenerator.zip.ExporterUnzipper;
 import de.samply.qualityreportgenerator.zip.ExporterUnzipperException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Arrays;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
@@ -20,47 +20,54 @@ import org.springframework.stereotype.Component;
 @Component
 public class QualityReportGenerator {
 
-  private ExporterClient exporterClient;
-  private ExporterUnzipper exporterUnzipper;
+  private final ExporterClient exporterClient;
+  private final ExporterUnzipper exporterUnzipper;
+  private final QualityReportTemplateManager qualityReportTemplateManager;
+  private final VariablesReplacer variablesReplacer;
   private final Integer workbookWindow;
   private final Path qualityReportsDirectory;
-  private final String qualityReportFilenameTemplate;
-  private final String timestampFormat;
 
 
   public QualityReportGenerator(
       ExporterClient exporterClient,
       ExporterUnzipper exporterUnzipper,
+      QualityReportTemplateManager qualityReportTemplateManager,
+      VariablesReplacer variablesReplacer,
       @Value(QrgConst.EXCEL_WORKBOOK_WINDOW_SV) int workbookWindow,
-      @Value(QrgConst.QUALITY_REPORTS_DIRECTORY_SV) String qualityReportsDirectory,
-      @Value(QrgConst.QUALITY_REPORT_FILENAME_TEMPLATE_SV) String qualityReportFilenameTemplate,
-      @Value(QrgConst.TIMESTAMP_FORMAT_SV) String timestampFormat) {
+      @Value(QrgConst.QUALITY_REPORTS_DIRECTORY_SV) String qualityReportsDirectory
+  ) {
     this.exporterClient = exporterClient;
     this.exporterUnzipper = exporterUnzipper;
+    this.qualityReportTemplateManager = qualityReportTemplateManager;
+    this.variablesReplacer = variablesReplacer;
     this.workbookWindow = workbookWindow;
     this.qualityReportsDirectory = Path.of(qualityReportsDirectory);
-    this.qualityReportFilenameTemplate = qualityReportFilenameTemplate;
-    this.timestampFormat = timestampFormat;
   }
 
-  public void generate() throws QualityReportGeneratorException {
-    fetchExportFiles();
+  public void generate(String qualityReportTemplateId) throws QualityReportGeneratorException {
+    QualityReportTemplate qualityReportTemplate = qualityReportTemplateManager.getQualityReportTemplate(
+        qualityReportTemplateId);
+    if (qualityReportTemplate == null) {
+      throw new QualityReportGeneratorException("Template Id not found");
+    }
+    fetchExportFiles(qualityReportTemplate);
   }
 
-  private void fetchExportFiles() throws QualityReportGeneratorException {
+  private void fetchExportFiles(QualityReportTemplate template)
+      throws QualityReportGeneratorException {
     try {
-      exporterClient.fetchExportFiles(filePath -> generate(filePath));
+      exporterClient.fetchExportFiles(filePath -> generate(template, filePath));
     } catch (ExporterClientException | RuntimeException e) {
       throw new QualityReportGeneratorException(e);
     }
   }
 
-  private void generate(String filePath) {
+  private void generate(QualityReportTemplate template, String filePath) {
     Path[] paths = extractPaths(filePath);
     Workbook workbook = new SXSSFWorkbook(workbookWindow);
     Arrays.stream(paths).forEach(path -> addPathToWorkbook(workbook, path));
     //TODO
-    Path result = writeWorkbookAndGetQualityReportPath(workbook);
+    Path result = writeWorkbookAndGetQualityReportPath(workbook, template);
     //TODO
   }
 
@@ -76,8 +83,10 @@ public class QualityReportGenerator {
 
   }
 
-  private Path writeWorkbookAndGetQualityReportPath(Workbook workbook) {
-    Path result = qualityReportsDirectory.resolve(fetchQualityReportFilename());
+  private Path writeWorkbookAndGetQualityReportPath(Workbook workbook,
+      QualityReportTemplate template) {
+    Path result = qualityReportsDirectory.resolve(
+        variablesReplacer.fetchQualityReportFilename(template));
     writeWorkbook(result, workbook);
     return result;
   }
@@ -89,22 +98,5 @@ public class QualityReportGenerator {
       throw new RuntimeException(e);
     }
   }
-
-  private String fetchQualityReportFilename() {
-    String result = qualityReportFilenameTemplate;
-    if (result.contains(QrgConst.TEMPLATE_TIMESTAMP)) {
-      String timestamp = getTimestamp(timestampFormat);
-      result = result.replace(QrgConst.TEMPLATE_TIMESTAMP, timestamp);
-    }
-    return result;
-  }
-
-  private String getTimestamp(String format) {
-    if (format == null) {
-      format = timestampFormat;
-    }
-    return new SimpleDateFormat(format).format(Timestamp.from(Instant.now()));
-  }
-
 
 }

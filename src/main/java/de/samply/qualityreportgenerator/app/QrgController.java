@@ -6,6 +6,7 @@ import de.samply.qualityreportgenerator.utils.ProjectVersion;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -25,8 +26,10 @@ public class QrgController {
   }
 
   @GetMapping(value = QrgConst.GENERATE)
-  public ResponseEntity<String> generate() throws QualityReportGeneratorException {
-    qualityReportGenerator.generate();
+  public ResponseEntity<String> generate(
+      @RequestParam(name = QrgConst.QUALITY_REPORT_TEMPLATE_ID, required = false) String templateId
+  ) throws QualityReportGeneratorException {
+    qualityReportGenerator.generate(templateId);
     return new ResponseEntity<>("Hello World!", HttpStatus.OK);
   }
 

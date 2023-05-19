@@ -9,6 +9,9 @@ public class QrgConst {
   public static final String INFO = "/info";
   public static final String GENERATE = "/generate";
 
+  // REST Parameters
+  public static final String QUALITY_REPORT_TEMPLATE_ID = "templateId";
+
 
   // Exporter Variables
   public final static String EXPORTER_REQUEST = "/request";
@@ -78,6 +81,9 @@ public class QrgConst {
   public static final int RANDOM_FILENAME_SIZE = 10;
   public static final String APP_NAME = "Quality Report Generator";
   public static final String TEMP_DIRECTORY_PREFIX = "TEMP_";
-  public final static String TEMPLATE_TIMESTAMP = "{TIMESTAMP}";
+  public final static String TEMPLATE_START = "{";
+  public final static String TEMPLATE_END = "}";
+  public final static String TEMPLATE_SEPARATOR = ":";
+  public final static String TEMPLATE_TIMESTAMP = "TIMESTAMP";
 
 }
