@@ -13,3 +13,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Exporter Client
 - Download export
 - Unzip files
+- Templates
+- Thymeleaf support
