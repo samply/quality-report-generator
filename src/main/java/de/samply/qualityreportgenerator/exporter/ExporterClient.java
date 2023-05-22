@@ -3,6 +3,7 @@ package de.samply.qualityreportgenerator.exporter;
 import de.samply.qualityreportgenerator.app.QrgConst;
 import de.samply.qualityreportgenerator.template.Exporter;
 import de.samply.qualityreportgenerator.template.QualityReportTemplate;
+import java.util.Optional;
 import java.util.function.Function;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -10,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import reactor.core.publisher.Mono;
 
 import java.io.ByteArrayInputStream;
@@ -66,13 +69,19 @@ public class ExporterClient {
       throws ExporterClientException {
     logger.info("Sending request to exporter...");
     Exporter exporter = fetchExporter(template);
-    RequestResponseEntity requestResponseEntity = webClient.post().uri(
-            uriBuilder -> uriBuilder.path(QrgConst.EXPORTER_REQUEST)
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporter.getQueryFormat())
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID, exporter.getTemplateId())
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporter.getOutputFormat())
-                .build()).header(QrgConst.HTTP_HEADER_API_KEY, exporterApiKey).retrieve()
+    RequestBodySpec requestBodySpec = webClient.post().uri(
+        uriBuilder -> uriBuilder.path(QrgConst.EXPORTER_REQUEST)
+            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
+            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporter.getQueryFormat())
+            .queryParamIfPresent(QrgConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
+                Optional.of(exporter.getTemplateId()))
+            .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporter.getOutputFormat())
+            .build()).header(QrgConst.HTTP_HEADER_API_KEY, exporterApiKey);
+    if (exporter.getTemplate() != null && exporter.getTemplate().trim().length() > 0) {
+      requestBodySpec.contentType(MediaType.APPLICATION_XML);
+      requestBodySpec.bodyValue(exporter.getTemplate());
+    }
+    RequestResponseEntity requestResponseEntity = requestBodySpec.retrieve()
         .bodyToMono(RequestResponseEntity.class).block();
     fetchExportFiles(requestResponseEntity, exportFilePathConsumer);
   }
@@ -82,8 +91,10 @@ public class ExporterClient {
     exporter.setQuery(fetchExporterValue(template, Exporter::getQuery, exporterQuery));
     exporter.setQueryFormat(
         fetchExporterValue(template, Exporter::getQueryFormat, exporterQueryFormat));
-    exporter.setTemplateId(
-        fetchExporterValue(template, Exporter::getTemplateId, exporterTemplateId));
+    if (exporter.getTemplate() == null){
+      exporter.setTemplateId(
+          fetchExporterValue(template, Exporter::getTemplateId, exporterTemplateId));
+    }
     exporter.setOutputFormat(
         fetchExporterValue(template, Exporter::getOutputFormat, exporterOutputFormat));
     return exporter;

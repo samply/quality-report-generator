@@ -17,3 +17,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Thymeleaf support
 - Variables Replacer
 - Exporter configuration in template
+- Exporter template in quality report template (optional)

@@ -2,6 +2,7 @@ package de.samply.qualityreportgenerator.template;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 
 public class Exporter {
 
@@ -24,6 +25,10 @@ public class Exporter {
   @JsonProperty(value = "output-format")
 
   private String outputFormat;
+
+  @JacksonXmlText
+  private String template;
+
 
   public String getQuery() {
     return query;
@@ -55,6 +60,14 @@ public class Exporter {
 
   public void setOutputFormat(String outputFormat) {
     this.outputFormat = outputFormat;
+  }
+
+  public String getTemplate() {
+    return template;
+  }
+
+  public void setTemplate(String template) {
+    this.template = template;
   }
 
 }
