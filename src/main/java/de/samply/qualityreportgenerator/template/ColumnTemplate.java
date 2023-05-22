@@ -2,6 +2,7 @@ package de.samply.qualityreportgenerator.template;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import de.samply.qualityreportgenerator.template.script.ScriptReference;
 
 public class ColumnTemplate {
 
@@ -11,11 +12,11 @@ public class ColumnTemplate {
 
   @JacksonXmlProperty(isAttribute = true, localName = "header-format-script")
   @JsonProperty(value = "header-format-script")
-  private String headerFormatScript;
+  private ScriptReference headerFormatScript;
 
   @JacksonXmlProperty(isAttribute = true, localName = "value-format-script")
   @JsonProperty(value = "value-format-script")
-  private String valueFormatScript;
+  private ScriptReference valueFormatScript;
 
 
   public String getName() {
@@ -26,19 +27,21 @@ public class ColumnTemplate {
     this.name = name;
   }
 
-  public String getHeaderFormatScript() {
+  public ScriptReference getHeaderFormatScript() {
     return headerFormatScript;
   }
 
-  public void setHeaderFormatScript(String headerFormatScript) {
+  public void setHeaderFormatScript(
+      ScriptReference headerFormatScript) {
     this.headerFormatScript = headerFormatScript;
   }
 
-  public String getValueFormatScript() {
+  public ScriptReference getValueFormatScript() {
     return valueFormatScript;
   }
 
-  public void setValueFormatScript(String valueFormatScript) {
+  public void setValueFormatScript(
+      ScriptReference valueFormatScript) {
     this.valueFormatScript = valueFormatScript;
   }
 

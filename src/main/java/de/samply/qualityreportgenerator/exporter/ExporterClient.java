@@ -1,6 +1,9 @@
 package de.samply.qualityreportgenerator.exporter;
 
 import de.samply.qualityreportgenerator.app.QrgConst;
+import de.samply.qualityreportgenerator.template.Exporter;
+import de.samply.qualityreportgenerator.template.QualityReportTemplate;
+import java.util.function.Function;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -58,18 +61,38 @@ public class ExporterClient {
     this.timeInSecondsToWaitBetweenAttemptsToGetExport = timeInSecondsToWaitBetweenAttemptsToGetExport;
   }
 
-  public void fetchExportFiles(Consumer<String> exportFilePathConsumer)
+  public void fetchExportFiles(Consumer<String> exportFilePathConsumer,
+      QualityReportTemplate template)
       throws ExporterClientException {
     logger.info("Sending request to exporter...");
+    Exporter exporter = fetchExporter(template);
     RequestResponseEntity requestResponseEntity = webClient.post().uri(
             uriBuilder -> uriBuilder.path(QrgConst.EXPORTER_REQUEST)
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporterQuery)
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporterQueryFormat)
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID, exporterTemplateId)
-                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporterOutputFormat)
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporter.getQueryFormat())
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID, exporter.getTemplateId())
+                .queryParam(QrgConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporter.getOutputFormat())
                 .build()).header(QrgConst.HTTP_HEADER_API_KEY, exporterApiKey).retrieve()
         .bodyToMono(RequestResponseEntity.class).block();
     fetchExportFiles(requestResponseEntity, exportFilePathConsumer);
+  }
+
+  private Exporter fetchExporter(QualityReportTemplate template) {
+    Exporter exporter = new Exporter();
+    exporter.setQuery(fetchExporterValue(template, Exporter::getQuery, exporterQuery));
+    exporter.setQueryFormat(
+        fetchExporterValue(template, Exporter::getQueryFormat, exporterQueryFormat));
+    exporter.setTemplateId(
+        fetchExporterValue(template, Exporter::getTemplateId, exporterTemplateId));
+    exporter.setOutputFormat(
+        fetchExporterValue(template, Exporter::getOutputFormat, exporterOutputFormat));
+    return exporter;
+  }
+
+  private String fetchExporterValue(QualityReportTemplate template,
+      Function<Exporter, String> templateFunction, String defaultValue) {
+    return (template != null && templateFunction.apply(template.getExporter()) != null)
+        ? templateFunction.apply(template.getExporter()) : defaultValue;
   }
 
   private void fetchExportFiles(RequestResponseEntity requestResponseEntity,

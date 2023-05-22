@@ -56,7 +56,7 @@ public class QualityReportGenerator {
   private void fetchExportFiles(QualityReportTemplate template)
       throws QualityReportGeneratorException {
     try {
-      exporterClient.fetchExportFiles(filePath -> generate(template, filePath));
+      exporterClient.fetchExportFiles(filePath -> generate(template, filePath), template);
     } catch (ExporterClientException | RuntimeException e) {
       throw new QualityReportGeneratorException(e);
     }

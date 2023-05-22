@@ -22,6 +22,11 @@ public class QualityReportTemplate {
   @JsonProperty("sheet")
   private List<SheetTemplate> sheetTemplates = new ArrayList<>();
 
+  @JacksonXmlProperty(isAttribute = true, localName = "exporter")
+  @JsonProperty("exporter")
+  private Exporter exporter;
+
+
   public String getId() {
     return id;
   }
@@ -47,4 +52,11 @@ public class QualityReportTemplate {
     this.sheetTemplates = sheetTemplates;
   }
 
+  public Exporter getExporter() {
+    return exporter;
+  }
+
+  public void setExporter(Exporter exporter) {
+    this.exporter = exporter;
+  }
 }
