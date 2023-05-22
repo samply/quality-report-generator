@@ -48,10 +48,17 @@ public class QualityReportTemplateManager {
   }
 
   private void loadTemplateWithoutExceptionHandling(Path templatePath) throws IOException {
-    QualityReportTemplate qualityReportTemplate = new XmlMapper().
-        readValue(ScriptParser.readTemplateAndParseScripts(templatePath),
-            QualityReportTemplate.class);
+    QualityReportTemplate qualityReportTemplate = fetchTemplate(templatePath);
     idQualityReportTemplateMap.put(qualityReportTemplate.getId(), qualityReportTemplate);
+  }
+
+  public QualityReportTemplate fetchTemplate(Path templatePath) throws IOException {
+    return fetchTemplate(Files.readString(templatePath));
+  }
+
+  public QualityReportTemplate fetchTemplate(String template) throws IOException {
+    return new XmlMapper().readValue(ScriptParser.readTemplateAndParseScripts(template),
+        QualityReportTemplate.class);
   }
 
   public QualityReportTemplate getQualityReportTemplate(String qualityReportTemplateId) {

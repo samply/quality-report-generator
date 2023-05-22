@@ -22,7 +22,6 @@ public class QualityReportGenerator {
 
   private final ExporterClient exporterClient;
   private final ExporterUnzipper exporterUnzipper;
-  private final QualityReportTemplateManager qualityReportTemplateManager;
   private final VariablesReplacer variablesReplacer;
   private final Integer workbookWindow;
   private final Path qualityReportsDirectory;
@@ -31,30 +30,18 @@ public class QualityReportGenerator {
   public QualityReportGenerator(
       ExporterClient exporterClient,
       ExporterUnzipper exporterUnzipper,
-      QualityReportTemplateManager qualityReportTemplateManager,
       VariablesReplacer variablesReplacer,
       @Value(QrgConst.EXCEL_WORKBOOK_WINDOW_SV) int workbookWindow,
       @Value(QrgConst.QUALITY_REPORTS_DIRECTORY_SV) String qualityReportsDirectory
   ) {
     this.exporterClient = exporterClient;
     this.exporterUnzipper = exporterUnzipper;
-    this.qualityReportTemplateManager = qualityReportTemplateManager;
     this.variablesReplacer = variablesReplacer;
     this.workbookWindow = workbookWindow;
     this.qualityReportsDirectory = Path.of(qualityReportsDirectory);
   }
 
-  public void generate(String qualityReportTemplateId) throws QualityReportGeneratorException {
-    QualityReportTemplate qualityReportTemplate = qualityReportTemplateManager.getQualityReportTemplate(
-        qualityReportTemplateId);
-    if (qualityReportTemplate == null) {
-      throw new QualityReportGeneratorException("Template Id not found");
-    }
-    fetchExportFiles(qualityReportTemplate);
-  }
-
-  private void fetchExportFiles(QualityReportTemplate template)
-      throws QualityReportGeneratorException {
+  public void generate(QualityReportTemplate template) throws QualityReportGeneratorException {
     try {
       exporterClient.fetchExportFiles(filePath -> generate(template, filePath), template);
     } catch (ExporterClientException | RuntimeException e) {
@@ -64,11 +51,11 @@ public class QualityReportGenerator {
 
   private void generate(QualityReportTemplate template, String filePath) {
     Path[] paths = extractPaths(filePath);
+    // TODO
     Workbook workbook = new SXSSFWorkbook(workbookWindow);
-    Arrays.stream(paths).forEach(path -> addPathToWorkbook(workbook, path));
-    //TODO
+    // TODO
     Path result = writeWorkbookAndGetQualityReportPath(workbook, template);
-    //TODO
+    // TODO
   }
 
   private Path[] extractPaths(String filePath) {
@@ -79,9 +66,6 @@ public class QualityReportGenerator {
     }
   }
 
-  private void addPathToWorkbook(Workbook workbook, Path path) {
-
-  }
 
   private Path writeWorkbookAndGetQualityReportPath(Workbook workbook,
       QualityReportTemplate template) {

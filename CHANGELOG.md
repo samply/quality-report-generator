@@ -18,3 +18,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Variables Replacer
 - Exporter configuration in template
 - Exporter template in quality report template (optional)
+- Template in request
