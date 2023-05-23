@@ -1,7 +1,8 @@
 package de.samply.qualityreportgenerator.template.script;
 
 public enum ScriptFramework {
-  THYMELEAF("thymeleaf");
+  THYMELEAF("thymeleaf"),
+  GROOVY_TEMPLATES("groovy");
 
   private String framework;
 
@@ -19,6 +20,19 @@ public enum ScriptFramework {
 
   public String getFramework() {
     return framework;
+  }
+
+  public static ScriptFramework getDefault() {
+    return THYMELEAF;
+  }
+
+  public static ScriptFramework valueOfFramework(String framework) {
+    for (ScriptFramework e : values()) {
+      if (e.framework.equals(framework)) {
+        return e;
+      }
+    }
+    return null;
   }
 
 }

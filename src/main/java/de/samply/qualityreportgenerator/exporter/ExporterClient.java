@@ -3,9 +3,20 @@ package de.samply.qualityreportgenerator.exporter;
 import de.samply.qualityreportgenerator.app.QrgConst;
 import de.samply.qualityreportgenerator.template.Exporter;
 import de.samply.qualityreportgenerator.template.QualityReportTemplate;
+import de.samply.qualityreportgenerator.utils.FileUtils;
+import java.io.ByteArrayInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,18 +28,6 @@ import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import reactor.core.publisher.Mono;
-
-import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 @Component
 public class ExporterClient {
@@ -91,7 +90,7 @@ public class ExporterClient {
     exporter.setQuery(fetchExporterValue(template, Exporter::getQuery, exporterQuery));
     exporter.setQueryFormat(
         fetchExporterValue(template, Exporter::getQueryFormat, exporterQueryFormat));
-    if (exporter.getTemplate() == null){
+    if (exporter.getTemplate() == null) {
       exporter.setTemplateId(
           fetchExporterValue(template, Exporter::getTemplateId, exporterTemplateId));
     }
@@ -159,7 +158,7 @@ public class ExporterClient {
   private String fetchFilename(ClientResponse clientResponse) {
     List<String> header = clientResponse.headers().header(QrgConst.HTTP_HEADER_CONTENT_DISPOSITION);
     return (header != null && header.size() > 0) ? fetchFilenameFromHeader(header.get(0))
-        : fetchRandomFilename();
+        : FileUtils.fetchRandomFilename(QrgConst.DEFAULT_EXPORTER_FILE_EXTENSION);
 
   }
 
@@ -168,15 +167,11 @@ public class ExporterClient {
         QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME)) ? headerField.substring(
         headerField.indexOf(QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME)
             + QrgConst.HTTP_HEADER_CONTENT_DISPOSITION_FILENAME.length()).replace("\"", "")
-        : fetchRandomFilename();
+        : FileUtils.fetchRandomFilename(QrgConst.DEFAULT_EXPORTER_FILE_EXTENSION);
   }
 
   private String fetchFilePath(String filename) {
     return Path.of(tempFilesDirectory).resolve(filename).toString();
-  }
-
-  private String fetchRandomFilename() {
-    return RandomStringUtils.random(QrgConst.RANDOM_FILENAME_SIZE, true, false) + ".zip";
   }
 
   private void copyInputStreamToFilePath(InputStream inputStream, String filePath) {

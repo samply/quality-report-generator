@@ -1,9 +1,15 @@
 package de.samply.qualityreportgenerator.app;
 
+import java.nio.charset.Charset;
+
 public class QrgConst {
 
 
   public final static String DEFAULT_TIMESTAMP_FORMAT = "yyyyMMdd-HH_mm";
+  public static final String DEFAULT_CSV_DELIMITER = "\t";
+  public static final String DEFAULT_END_OF_LINE = System.lineSeparator();
+  public static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+
 
   // REST Paths
   public static final String INFO = "/info";
@@ -38,11 +44,15 @@ public class QrgConst {
   public final static String QUALITY_REPORT_FILENAME_TEMPLATE = "QUALITY_REPORT_FILENAME_TEMPLATE";
   public final static String TIMESTAMP_FORMAT = "TIMESTAMP_FORMAT";
   public final static String QUALITY_REPORT_TEMPLATE_DIRECTORY = "QUALITY_REPORT_TEMPLATE_DIRECTORY";
+  public final static String FILE_CHARSET = "FILE_CHARSET";
+  public final static String FILE_END_OF_LINE = "FILE_END_OF_LINE";
+  public final static String CSV_DELIMITER = "CSV_DELIMITER";
 
 
   // Spring Values (SV)
   public final static String HEAD_SV = "${";
   public final static String BOTTOM_SV = "}";
+  public final static String DEFAULT_NULL_VALUE = ":#{null}";
   //    public final static String CROSS_ORIGINS_SV =
 //            "#{'" + HEAD_SV + CROSS_ORIGINS + ":#{null}" + BOTTOM_SV + "'.split(',')}";
   public final static String EXPORTER_URL_SV =
@@ -73,6 +83,12 @@ public class QrgConst {
       HEAD_SV + TIMESTAMP_FORMAT + ":" + DEFAULT_TIMESTAMP_FORMAT + BOTTOM_SV;
   public final static String QUALITY_REPORT_TEMPLATE_DIRECTORY_SV =
       HEAD_SV + QUALITY_REPORT_TEMPLATE_DIRECTORY + ":./templates" + BOTTOM_SV;
+  public final static String FILE_CHARSET_SV =
+      HEAD_SV + FILE_CHARSET + DEFAULT_NULL_VALUE + BOTTOM_SV;
+  public final static String FILE_END_OF_LINE_SV =
+      HEAD_SV + FILE_END_OF_LINE + DEFAULT_NULL_VALUE + BOTTOM_SV;
+  public final static String CSV_DELIMITER_SV =
+      HEAD_SV + CSV_DELIMITER + DEFAULT_NULL_VALUE + BOTTOM_SV;
 
 
   // Other variables:
@@ -85,5 +101,8 @@ public class QrgConst {
   public final static String TEMPLATE_END = "}";
   public final static String TEMPLATE_SEPARATOR = ":";
   public final static String TEMPLATE_TIMESTAMP = "TIMESTAMP";
+  public final static String DEFAULT_EXPORTER_FILE_EXTENSION = "zip";
+  public final static String DEFAULT_SCRIPT_RESULT_FILE_EXTENSION = "csv";
+  public final static String THYMELEAF_CONTEXT_VARIABLE = "context";
 
 }

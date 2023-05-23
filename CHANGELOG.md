@@ -19,3 +19,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Exporter configuration in template
 - Exporter template in quality report template (optional)
 - Template in request
+- Thymeleaf Engine
+- Groovy-Templates Engine
