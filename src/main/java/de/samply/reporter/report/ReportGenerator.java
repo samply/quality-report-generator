@@ -20,9 +20,13 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
@@ -111,11 +115,13 @@ public class ReportGenerator {
   private void fillSheetWithData(Workbook workbook, SheetTemplate template,
       Map<Script, ScriptResult> scriptResultMap) {
     Sheet sheet = createSheet(workbook, template);
-    createHeaderRow(sheet, template);
+    createHeaderRow(workbook, sheet, template);
     if (template.getValuesScript() != null) {
       ScriptResult result = scriptResultMap.get(template.getValuesScript().getScript());
       if (result != null) {
         fillSheetWithData(sheet, template, result);
+        autoSizeSheet(sheet);
+        addAutoFilter(sheet);
       }
     }
   }
@@ -128,12 +134,25 @@ public class ReportGenerator {
     return sheet;
   }
 
-  private void createHeaderRow(Sheet sheet, SheetTemplate template) {
+  private void createHeaderRow(Workbook workbook, Sheet sheet, SheetTemplate template) {
     Row row = sheet.createRow(0);
     AtomicInteger counter = new AtomicInteger(0);
     template.getColumnTemplates().forEach(
         columnTemplate -> row.createCell(counter.getAndIncrement())
             .setCellValue(columnTemplate.getName()));
+    sheet.createFreezePane(0, 1);
+    boldHeaderRow(workbook, row);
+  }
+
+  private void boldHeaderRow(Workbook workbook, Row titleRow) {
+    CellStyle cellStyle = workbook.createCellStyle();
+    Font font = workbook.createFont();
+    font.setBold(true);
+    cellStyle.setFont(font);
+    for (int j = 0; j < titleRow.getLastCellNum(); j++) {
+      Cell cell = titleRow.getCell(j);
+      cell.setCellStyle(cellStyle);
+    }
   }
 
   private void fillSheetWithData(Sheet sheet, SheetTemplate template, ScriptResult result) {
@@ -161,5 +180,25 @@ public class ReportGenerator {
     });
   }
 
+  private void autoSizeSheet(Sheet sheet) {
+    Row headerRow = sheet.getRow(0);
+    if (headerRow != null) {
+      for (int j = 0; j <= headerRow.getLastCellNum(); j++) {
+        sheet.autoSizeColumn(j);
+      }
+    }
+  }
+
+  private void addAutoFilter(Sheet sheet) {
+    int rowStartIndex = 0;
+    int rowEndIndex = sheet.getLastRowNum();
+
+    int columnStartIndex = 0;
+    int columnEndIndex = sheet.getRow(0).getLastCellNum() - 1;
+
+    CellRangeAddress cra = new CellRangeAddress(rowStartIndex, rowEndIndex, columnStartIndex,
+        columnEndIndex);
+    sheet.setAutoFilter(cra);
+  }
 
 }
