@@ -24,7 +24,8 @@
 hs_err_pid*
 replay_pid*
 
-quality-reports
+reports
 temp-files
 test-files
 templates
+excel-files

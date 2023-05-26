@@ -1,4 +1,4 @@
-<%@ page import="de.samply.qualityreportgenerator.context.Context" %>
+<%@ page import="de.samply.reporter.context.Context" %>
 <% Context dataModel = context %>
 <%
     def patientsProAttributeValueKey = "Patients pro attribute-value"

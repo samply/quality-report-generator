@@ -21,3 +21,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Template in request
 - Thymeleaf Engine
 - Groovy-Templates Engine
+- Report Generator

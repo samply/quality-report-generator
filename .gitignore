@@ -5,9 +5,10 @@ target/
 !**/src/test/**/target/
 .mvn
 temp-files
-qualit-reports
+reports
 test-files
 templates
+excel-files
 
 ### STS ###
 .apt_generated
