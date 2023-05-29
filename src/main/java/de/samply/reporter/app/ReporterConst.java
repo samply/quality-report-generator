@@ -103,7 +103,8 @@ public class ReporterConst {
   public final static String TEMPLATE_TIMESTAMP = "TIMESTAMP";
   public final static String DEFAULT_EXPORTER_FILE_EXTENSION = "zip";
   public final static String DEFAULT_SCRIPT_RESULT_FILE_EXTENSION = "csv";
-  public final static String THYMELEAF_CONTEXT_VARIABLE = "context";
+  public final static String CONTEXT_VARIABLE = "context";
+  public final static String CELL_CONTEXT_VARIABLE = "cellContext";
   public final static String EMPTY_EXCEL_CELL = "";
 
 }

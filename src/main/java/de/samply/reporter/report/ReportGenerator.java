@@ -1,15 +1,20 @@
 package de.samply.reporter.report;
 
 import de.samply.reporter.app.ReporterConst;
+import de.samply.reporter.context.CellContext;
 import de.samply.reporter.context.Context;
 import de.samply.reporter.context.ContextGenerator;
 import de.samply.reporter.exporter.ExporterClient;
 import de.samply.reporter.exporter.ExporterClientException;
+import de.samply.reporter.script.ScriptEngineException;
 import de.samply.reporter.script.ScriptEngineManager;
 import de.samply.reporter.script.ScriptResult;
+import de.samply.reporter.template.ColumnTemplate;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.template.SheetTemplate;
 import de.samply.reporter.template.script.Script;
+import de.samply.reporter.utils.ExternalSheetUtils;
+import de.samply.reporter.utils.ExternalSheetUtilsException;
 import de.samply.reporter.utils.VariablesReplacer;
 import de.samply.reporter.zip.ExporterUnzipper;
 import de.samply.reporter.zip.ExporterUnzipperException;
@@ -77,6 +82,7 @@ public class ReportGenerator {
         template, context);
     Workbook workbook = new SXSSFWorkbook(workbookWindow);
     fillWorkbookWithData(workbook, template, scriptResultMap);
+    addFormatToWorkbook(workbook, template);
     Path result = writeWorkbookAndGetQualityReportPath(workbook, template);
     // TODO: Remove temporal files
   }
@@ -109,7 +115,21 @@ public class ReportGenerator {
   private void fillWorkbookWithData(Workbook workbook, ReportTemplate template,
       Map<Script, ScriptResult> scriptResultMap) {
     template.getSheetTemplates()
-        .forEach(sheetTemplate -> fillSheetWithData(workbook, sheetTemplate, scriptResultMap));
+        .forEach(sheetTemplate -> {
+          if (sheetTemplate.getFileUrl() != null || sheetTemplate.getFilePath() != null) {
+            addSheetFromSourceExcelFile(workbook, sheetTemplate);
+          } else {
+            fillSheetWithData(workbook, sheetTemplate, scriptResultMap);
+          }
+        });
+  }
+
+  private void addSheetFromSourceExcelFile(Workbook workbook, SheetTemplate template) {
+    try {
+      ExternalSheetUtils.addSheetFromSourceExcelFile(workbook, template);
+    } catch (ExternalSheetUtilsException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private void fillSheetWithData(Workbook workbook, SheetTemplate template,
@@ -199,6 +219,55 @@ public class ReportGenerator {
     CellRangeAddress cra = new CellRangeAddress(rowStartIndex, rowEndIndex, columnStartIndex,
         columnEndIndex);
     sheet.setAutoFilter(cra);
+  }
+
+  private void addFormatToWorkbook(Workbook workbook, ReportTemplate template) {
+    template.getSheetTemplates().forEach(sheetTemplate -> {
+      AtomicInteger columnNumber = new AtomicInteger(0);
+      sheetTemplate.getColumnTemplates().forEach(
+          columnTemplate -> addFormatToWorkbook(workbook, sheetTemplate, columnTemplate,
+              columnNumber.getAndIncrement()));
+    });
+  }
+
+  private void addFormatToWorkbook(Workbook workbook, SheetTemplate sheetTemplate,
+      ColumnTemplate columnTemplate, int columnNumber) {
+    Sheet sheet = workbook.getSheet(sheetTemplate.getName());
+    addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber);
+    addValueFormatToWorkbook(columnTemplate, sheet, columnNumber);
+  }
+
+  private void addHeaderFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber) {
+    if (template.getHeaderFormatScript() != null) {
+      Script script = template.getHeaderFormatScript().getScript();
+      if (script != null) {
+        fetchCellContext(script, sheet.getWorkbook()).applyCellStyleToCell(
+            sheet.getRow(0).getCell(columnNumber));
+      }
+    }
+  }
+
+  private void addValueFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber) {
+    if (template.getValueFormatScript() != null) {
+      Script script = template.getValueFormatScript().getScript();
+      if (script != null) {
+        CellContext cellContext = fetchCellContext(script, sheet.getWorkbook());
+        int lastRowNum = sheet.getLastRowNum();
+        if (lastRowNum > 0) {
+          for (int i = 1; i <= lastRowNum; i++) {
+            cellContext.applyCellStyleToCell(sheet.getRow(i).getCell(columnNumber));
+          }
+        }
+      }
+    }
+  }
+
+  private CellContext fetchCellContext(Script script, Workbook workbook) {
+    try {
+      return scriptEngineManager.generateCellContext(script, workbook);
+    } catch (ScriptEngineException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 }

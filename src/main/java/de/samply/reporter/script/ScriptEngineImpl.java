@@ -77,5 +77,4 @@ public abstract class ScriptEngineImpl implements ScriptEngine {
     return FileUtils.fetchRandomFilename(ReporterConst.DEFAULT_SCRIPT_RESULT_FILE_EXTENSION);
   }
 
-
 }
