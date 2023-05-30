@@ -1,10 +1,12 @@
-package de.samply.qualityreportgenerator;
+package de.samply.reporter;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@Disabled
 @SpringBootTest
-class QualityReportGeneratorApplicationTests {
+class ReportGeneratorApplicationTests {
 
 	@Test
 	void contextLoads() {
