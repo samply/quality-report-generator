@@ -1,4 +1,4 @@
-FROM eclipse-temurin:20-jre-focal
+FROM eclipse-temurin:20-jre
 
 COPY target/reporter.jar /app/
 
