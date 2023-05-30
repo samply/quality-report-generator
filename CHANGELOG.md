@@ -24,3 +24,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Report Generator
 - Header format
 - External Sheet Utils
+- Report Meta Info File

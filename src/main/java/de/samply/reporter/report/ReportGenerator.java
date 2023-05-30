@@ -6,6 +6,7 @@ import de.samply.reporter.context.Context;
 import de.samply.reporter.context.ContextGenerator;
 import de.samply.reporter.exporter.ExporterClient;
 import de.samply.reporter.exporter.ExporterClientException;
+import de.samply.reporter.report.metainfo.ReportMetaInfo;
 import de.samply.reporter.script.ScriptEngineException;
 import de.samply.reporter.script.ScriptEngineManager;
 import de.samply.reporter.script.ScriptResult;
@@ -15,7 +16,6 @@ import de.samply.reporter.template.SheetTemplate;
 import de.samply.reporter.template.script.Script;
 import de.samply.reporter.utils.ExternalSheetUtils;
 import de.samply.reporter.utils.ExternalSheetUtilsException;
-import de.samply.reporter.utils.VariablesReplacer;
 import de.samply.reporter.zip.ExporterUnzipper;
 import de.samply.reporter.zip.ExporterUnzipperException;
 import java.io.FileOutputStream;
@@ -42,40 +42,36 @@ public class ReportGenerator {
 
   private final ExporterClient exporterClient;
   private final ExporterUnzipper exporterUnzipper;
-  private final VariablesReplacer variablesReplacer;
   private final ScriptEngineManager scriptEngineManager;
   private final ContextGenerator contextGenerator;
   private final Integer workbookWindow;
-  private final Path qualityReportsDirectory;
 
 
   public ReportGenerator(
       ExporterClient exporterClient,
       ExporterUnzipper exporterUnzipper,
-      VariablesReplacer variablesReplacer,
       ScriptEngineManager scriptEngineManager,
       ContextGenerator contextGenerator,
-      @Value(ReporterConst.EXCEL_WORKBOOK_WINDOW_SV) int workbookWindow,
-      @Value(ReporterConst.REPORTS_DIRECTORY_SV) String qualityReportsDirectory
+      @Value(ReporterConst.EXCEL_WORKBOOK_WINDOW_SV) int workbookWindow
   ) {
     this.exporterClient = exporterClient;
     this.exporterUnzipper = exporterUnzipper;
-    this.variablesReplacer = variablesReplacer;
     this.scriptEngineManager = scriptEngineManager;
     this.contextGenerator = contextGenerator;
     this.workbookWindow = workbookWindow;
-    this.qualityReportsDirectory = Path.of(qualityReportsDirectory);
   }
 
-  public void generate(ReportTemplate template) throws ReportGeneratorException {
+  public void generate(ReportTemplate template, ReportMetaInfo reportMetaInfo)
+      throws ReportGeneratorException {
     try {
-      exporterClient.fetchExportFiles(filePath -> generate(template, filePath), template);
+      exporterClient.fetchExportFiles(filePath -> generate(template, filePath, reportMetaInfo),
+          template);
     } catch (ExporterClientException | RuntimeException e) {
       throw new ReportGeneratorException(e);
     }
   }
 
-  private void generate(ReportTemplate template, String filePath) {
+  private void generate(ReportTemplate template, String filePath, ReportMetaInfo reportMetaInfo) {
     Path[] paths = extractPaths(filePath);
     Context context = contextGenerator.generate(template, paths);
     Map<Script, ScriptResult> scriptResultMap = scriptEngineManager.generateRawQualityReport(
@@ -83,7 +79,7 @@ public class ReportGenerator {
     Workbook workbook = new SXSSFWorkbook(workbookWindow);
     fillWorkbookWithData(workbook, template, scriptResultMap);
     addFormatToWorkbook(workbook, template);
-    Path result = writeWorkbookAndGetQualityReportPath(workbook, template);
+    writeWorkbook(reportMetaInfo.path(), workbook);
     // TODO: Remove temporal files
   }
 
@@ -93,15 +89,6 @@ public class ReportGenerator {
     } catch (ExporterUnzipperException e) {
       throw new RuntimeException(e);
     }
-  }
-
-
-  private Path writeWorkbookAndGetQualityReportPath(Workbook workbook,
-      ReportTemplate template) {
-    Path result = qualityReportsDirectory.resolve(
-        variablesReplacer.fetchQualityReportFilename(template));
-    writeWorkbook(result, workbook);
-    return result;
   }
 
   private void writeWorkbook(Path path, Workbook workbook) {

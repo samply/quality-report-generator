@@ -14,9 +14,12 @@ public class ReporterConst {
   // REST Paths
   public static final String INFO = "/info";
   public static final String GENERATE = "/generate";
+  public static final String REPORT = "/report";
+  public static final String REPORTS_LIST = "/reports-list";
 
   // REST Parameters
   public static final String REPORT_TEMPLATE_ID = "templateId";
+  public static final String REPORT_ID = "reportId";
 
 
   // Exporter Variables
@@ -47,6 +50,10 @@ public class ReporterConst {
   public final static String FILE_CHARSET = "FILE_CHARSET";
   public final static String FILE_END_OF_LINE = "FILE_END_OF_LINE";
   public final static String CSV_DELIMITER = "CSV_DELIMITER";
+  public final static String REPORTS_META_INFO_FILENAME = "REPORTS_META_INFO_FILENAME";
+  public final static String HTTP_RELATIVE_PATH = "HTTP_RELATIVE_PATH";
+  public final static String HTTP_SERVLET_REQUEST_SCHEME = "HTTP_SERVLET_REQUEST_SCHEME";
+
 
 
   // Spring Values (SV)
@@ -89,12 +96,22 @@ public class ReporterConst {
       HEAD_SV + FILE_END_OF_LINE + DEFAULT_NULL_VALUE + BOTTOM_SV;
   public final static String CSV_DELIMITER_SV =
       HEAD_SV + CSV_DELIMITER + DEFAULT_NULL_VALUE + BOTTOM_SV;
+  public final static String REPORTS_META_INFO_FILENAME_SV =
+      HEAD_SV + REPORTS_META_INFO_FILENAME + ":reports-meta-info.csv" + BOTTOM_SV;
+  public final static String HTTP_RELATIVE_PATH_SV =
+      HEAD_SV + HTTP_RELATIVE_PATH + ":" + BOTTOM_SV;
+  public final static String HTTP_SERVLET_REQUEST_SCHEME_SV =
+      HEAD_SV + HTTP_SERVLET_REQUEST_SCHEME + ":http" + BOTTOM_SV;
+
+
 
 
   // Other variables:
   public static final String HTTP_HEADER_CONTENT_DISPOSITION = "Content-Disposition";
   public static final String HTTP_HEADER_CONTENT_DISPOSITION_FILENAME = "filename=";
   public static final int RANDOM_FILENAME_SIZE = 10;
+  public static final int RANDOM_REPORT_ID_SIZE = 15;
+  public static final String REPORT_META_INFO_FILE_SEPARATOR = ",";
   public static final String APP_NAME = "Quality Report Generator";
   public static final String TEMP_DIRECTORY_PREFIX = "TEMP_";
   public final static String TEMPLATE_START = "{";
