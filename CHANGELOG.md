@@ -27,3 +27,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Report Meta Info File 
 - Download Report
 - Remove temporal files
+- 
+### Changed
+- Project name: quality-report-generator to reporter

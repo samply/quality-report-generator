@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 @Disabled
 class ReportTemplateManagerTest {
 
-  private final String directory = "../dktk-quality-report-generator/templates";
+  private final String directory = "../dktk-reporter/templates";
 
   @Test
   void getQualityReportTemplate() {

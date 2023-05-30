@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>de.samply</groupId>
-	<artifactId>quality-report-generator</artifactId>
+	<artifactId>reporter</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
-	<name>Quality Report Generator</name>
-	<description>Quality Report Generator based on Samply Exporter</description>
+	<name>Samply Reporter</name>
+	<description>Report Generator based on Samply Exporter</description>
 
 	<properties>
 		<java.version>20</java.version>
@@ -103,7 +103,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>quality-report-generator</finalName>
+		<finalName>reporter</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
