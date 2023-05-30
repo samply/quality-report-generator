@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.poi.ss.usermodel.Cell;
@@ -36,6 +37,7 @@ import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.FileSystemUtils;
 
 @Component
 public class ReportGenerator {
@@ -80,7 +82,29 @@ public class ReportGenerator {
     fillWorkbookWithData(workbook, template, scriptResultMap);
     addFormatToWorkbook(workbook, template);
     writeWorkbook(reportMetaInfo.path(), workbook);
-    // TODO: Remove temporal files
+    removeTemporalFiles(paths[0].getParent(), scriptResultMap.values());
+  }
+
+  private void removeTemporalFiles(Path sourceFilesDirectory,
+      Collection<ScriptResult> scriptResults) {
+    try {
+      removeTemporalFilesWithoutExceptionHandling(sourceFilesDirectory, scriptResults);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private void removeTemporalFilesWithoutExceptionHandling(Path sourceFilesDirectory,
+      Collection<ScriptResult> scriptResults)
+      throws IOException {
+    FileSystemUtils.deleteRecursively(sourceFilesDirectory);
+    scriptResults.forEach(scriptResult -> {
+      try {
+        Files.delete(scriptResult.getRawResult());
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    });
   }
 
   private Path[] extractPaths(String filePath) {

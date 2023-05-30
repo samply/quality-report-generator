@@ -26,3 +26,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - External Sheet Utils
 - Report Meta Info File 
 - Download Report
+- Remove temporal files
