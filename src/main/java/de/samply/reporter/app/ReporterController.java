@@ -143,5 +143,19 @@ public class ReporterController {
     return ResponseEntity.ok().body(reportMetaInfoManager.fetchAllExistingReportMetaInfos());
   }
 
+  @GetMapping(value = ReporterConst.REPORT_STATUS)
+  public ResponseEntity<ReportStatus> fetchReportStatus(
+      @RequestParam(name = ReporterConst.REPORT_ID) String reportId
+  ) throws ReportMetaInfoManagerException {
+    Optional<ReportMetaInfo> reportMetaInfo = reportMetaInfoManager.fetchReportMetaInfo(reportId);
+    if (reportMetaInfo.isEmpty()) {
+      return ResponseEntity.ok(ReportStatus.NOT_FOUND);
+    }
+    if (!reportMetaInfo.get().path().toFile().exists()) {
+      return ResponseEntity.ok(ReportStatus.RUNNING);
+    }
+    return ResponseEntity.ok(ReportStatus.OK);
+  }
+
 
 }
