@@ -4,16 +4,21 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.samply.reporter.report.ReportGenerator;
 import de.samply.reporter.report.ReportGeneratorException;
-import de.samply.reporter.report.metainfo.ReportMetaInfoManagerException;
 import de.samply.reporter.report.metainfo.ReportMetaInfo;
 import de.samply.reporter.report.metainfo.ReportMetaInfoManager;
+import de.samply.reporter.report.metainfo.ReportMetaInfoManagerException;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.template.ReportTemplateManager;
 import de.samply.reporter.utils.ProjectVersion;
 import jakarta.servlet.http.HttpServletRequest;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -107,19 +112,36 @@ public class ReporterController {
         + httpPath : httpPath;
   }
 
-  @GetMapping(value = ReporterConst.REPORT)
-  public ResponseEntity<String> fetchReport(
-      @RequestParam(name = ReporterConst.REPORT_ID, required = false) String templateId
-  ){
-    //TODO
-    return null;
+  @GetMapping(value = ReporterConst.REPORT, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public ResponseEntity<InputStreamResource> fetchReport(
+      @RequestParam(name = ReporterConst.REPORT_ID) String reportId
+  ) throws ReportMetaInfoManagerException, FileNotFoundException {
+    Optional<ReportMetaInfo> reportMetaInfo = reportMetaInfoManager.fetchReportMetaInfo(reportId);
+    if (reportMetaInfo.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+    if (!reportMetaInfo.get().path().toFile().exists()) {
+      return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+    return createResponseEntity(reportMetaInfo.get().path());
+  }
+
+  private ResponseEntity<InputStreamResource> createResponseEntity(Path path)
+      throws FileNotFoundException {
+    return createResponseEntity(new InputStreamResource(new FileInputStream(path.toFile())),
+        path.getFileName().toString());
+  }
+
+  private ResponseEntity<InputStreamResource> createResponseEntity(
+      InputStreamResource inputStreamResource, String filename) {
+    return ResponseEntity.ok().header("Content-Disposition", "attachment; filename=" + filename)
+        .body(inputStreamResource);
   }
 
   @GetMapping(value = ReporterConst.REPORTS_LIST)
   public ResponseEntity fetchAllReports() throws ReportMetaInfoManagerException {
-    return ResponseEntity.ok().body(reportMetaInfoManager.fetchAllReportMetaInfos());
+    return ResponseEntity.ok().body(reportMetaInfoManager.fetchAllExistingReportMetaInfos());
   }
-
 
 
 }

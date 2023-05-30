@@ -12,6 +12,8 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,7 +34,7 @@ public class ReportMetaInfoManager {
     this.reportsMetaInfoFile = this.reportsDirectory.resolve(reportsMetaInfoFilename);
     this.variablesReplacer = variablesReplacer;
 
-    ReportMetaInfo[] reportMetaInfos = fetchAllReportMetaInfos();
+    ReportMetaInfo[] reportMetaInfos = fetchAllExistingReportMetaInfos();
     recreateReportMetaInfoFile(List.of(reportMetaInfos));
   }
 
@@ -59,7 +61,7 @@ public class ReportMetaInfoManager {
   private void addReportMetaInfoToFileWithoutExceptionHandling(ReportMetaInfo reportMetaInfo)
       throws IOException {
     checkIfMetaInfoFileExistsAndCreateIfNot();
-    Files.write(reportsMetaInfoFile, reportMetaInfo.toString().getBytes(),
+    Files.write(reportsMetaInfoFile, (reportMetaInfo.toString() + "\n").getBytes(),
         StandardOpenOption.APPEND);
   }
 
@@ -79,21 +81,33 @@ public class ReportMetaInfoManager {
   }
 
   public ReportMetaInfo[] fetchAllReportMetaInfos() throws ReportMetaInfoManagerException {
+    return fetchAllReportMetaInfos(Optional.empty());
+  }
+
+  public ReportMetaInfo[] fetchAllExistingReportMetaInfos() throws ReportMetaInfoManagerException {
+    return fetchAllReportMetaInfos(
+        Optional.of(reportMetaInfo -> reportMetaInfo.path().toFile().exists()));
+  }
+
+  public ReportMetaInfo[] fetchAllReportMetaInfos(
+      Optional<Function<ReportMetaInfo, Boolean>> filter) throws ReportMetaInfoManagerException {
     try {
-      return fetchAllReportMetaInfosWithoutExceptionHandling();
+      return fetchAllReportMetaInfosWithoutExceptionHandling(filter);
     } catch (IOException e) {
       throw new ReportMetaInfoManagerException(e);
     }
   }
 
-  private ReportMetaInfo[] fetchAllReportMetaInfosWithoutExceptionHandling()
+
+  private ReportMetaInfo[] fetchAllReportMetaInfosWithoutExceptionHandling(
+      Optional<Function<ReportMetaInfo, Boolean>> filter)
       throws IOException {
     List<ReportMetaInfo> result = new ArrayList<>();
     checkIfMetaInfoFileExistsAndCreateIfNot();
     Files.readAllLines(reportsMetaInfoFile)
         .forEach(line -> {
           ReportMetaInfo reportMetaInfo = ReportMetaInfo.create(reportsDirectory, line);
-          if (reportMetaInfo.path().toFile().exists()) {
+          if (!filter.isPresent() || filter.get().apply(reportMetaInfo)) {
             result.add(reportMetaInfo);
           }
         });
@@ -112,6 +126,18 @@ public class ReportMetaInfoManager {
       }
     });
 
+  }
+
+  public Optional<ReportMetaInfo> fetchReportMetaInfo(String reportId)
+      throws ReportMetaInfoManagerException {
+    ReportMetaInfo result = null;
+    for (ReportMetaInfo reportMetaInfo : fetchAllReportMetaInfos()) {
+      if (reportMetaInfo.id().equals(reportId)) {
+        result = reportMetaInfo;
+        break;
+      }
+    }
+    return Optional.ofNullable(result);
   }
 
 }

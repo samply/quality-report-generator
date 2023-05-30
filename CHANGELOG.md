@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0 - 2023-05-26]
+## [1.0.0 - 2023-05-30]
 ### Added
 - Gitignore
 - Dockerignore
@@ -24,4 +24,5 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Report Generator
 - Header format
 - External Sheet Utils
-- Report Meta Info File
+- Report Meta Info File 
+- Download Report
