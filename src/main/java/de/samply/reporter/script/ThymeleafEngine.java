@@ -16,7 +16,7 @@ import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 public class ThymeleafEngine extends ScriptEngineImpl {
 
-  private TemplateEngine templateEngine = createTemplateEngine();
+  private final TemplateEngine templateEngine = createTemplateEngine();
 
   @Override
   public ScriptFramework getScriptFramework() {
@@ -34,8 +34,8 @@ public class ThymeleafEngine extends ScriptEngineImpl {
   }
 
   @Override
-  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext, Context context)
-      throws ScriptEngineException {
+  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext,
+      Context context) {
     CellContext cellContext = new CellContext(cellStyleContext);
     org.thymeleaf.context.Context thymeleafContext = new org.thymeleaf.context.Context();
     thymeleafContext.setVariable(ReporterConst.CONTEXT_VARIABLE, context);
@@ -46,7 +46,7 @@ public class ThymeleafEngine extends ScriptEngineImpl {
 
   private void generateResult(ScriptResult result, Script script,
       org.thymeleaf.context.Context context) throws ScriptEngineException {
-    try (FileWriter fileWriter = new FileWriter(result.getRawResult().toFile())) {
+    try (FileWriter fileWriter = new FileWriter(result.rawResult().toFile())) {
       generateResult(script, context, fileWriter);
     } catch (IOException e) {
       throw new ScriptEngineException(e);

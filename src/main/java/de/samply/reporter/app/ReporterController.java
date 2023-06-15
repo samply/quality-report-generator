@@ -34,12 +34,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class ReporterController {
 
   private final String projectVersion = ProjectVersion.getProjectVersion();
-  private ReportGenerator reportGenerator;
-  private ReportMetaInfoManager reportMetaInfoManager;
-  private ReportTemplateManager reportTemplateManager;
+  private final ReportGenerator reportGenerator;
+  private final ReportMetaInfoManager reportMetaInfoManager;
+  private final ReportTemplateManager reportTemplateManager;
   private final String httpRelativePath;
   private final String httpServletRequestScheme;
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
 
   public ReporterController(

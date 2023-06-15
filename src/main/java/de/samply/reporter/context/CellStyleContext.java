@@ -8,8 +8,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class CellStyleContext {
 
-  private Set<Cell> formattedCells = new HashSet<>();
-  private Workbook workbook;
+  private final Set<Cell> formattedCells = new HashSet<>();
+  private final Workbook workbook;
 
   public CellStyleContext(Workbook workbook) {
     this.workbook = workbook;

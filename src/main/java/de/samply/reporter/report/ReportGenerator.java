@@ -115,7 +115,7 @@ public class ReportGenerator {
     FileSystemUtils.deleteRecursively(sourceFilesDirectory);
     scriptResults.forEach(scriptResult -> {
       try {
-        Files.delete(scriptResult.getRawResult());
+        Files.delete(scriptResult.rawResult());
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -219,9 +219,9 @@ public class ReportGenerator {
       throws IOException {
     AtomicInteger rowIndex = new AtomicInteger(sheet.getLastRowNum() + 1);
     PercentageLogger percentageLogger = new PercentageLogger(logger,
-        (int) FileUtils.fetchNumberOfLines(result.getRawResult()),
+        (int) FileUtils.fetchNumberOfLines(result.rawResult()),
         "Filling sheet" + sheet.getSheetName() + " with data...");
-    Files.readAllLines(result.getRawResult())
+    Files.readAllLines(result.rawResult())
         .forEach(
             line -> {
               fillRowWithData(sheet.createRow(rowIndex.getAndIncrement()), line, result);
@@ -231,7 +231,7 @@ public class ReportGenerator {
 
   private void fillRowWithData(Row row, String line, ScriptResult result) {
     AtomicInteger columnIndex = new AtomicInteger(0);
-    Arrays.stream(line.split(result.getCsvConfig().delimiter())).forEach(
+    Arrays.stream(line.split(result.csvConfig().delimiter())).forEach(
         value -> row.createCell(columnIndex.getAndIncrement())
             .setCellValue((value != null) ? value : ReporterConst.EMPTY_EXCEL_CELL));
   }

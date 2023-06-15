@@ -11,10 +11,10 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class CellContext {
 
-  private CellStyleContext cellStyleContext;
+  private final CellStyleContext cellStyleContext;
   private CellStyle cellStyle;
   private Function<Cell, Boolean> condition;
-  private List<Consumer<Cell>> cellModifiers = new ArrayList<>();
+  private final List<Consumer<Cell>> cellModifiers = new ArrayList<>();
 
   public CellContext(CellStyleContext cellStyleContext) {
     this.cellStyleContext = cellStyleContext;
@@ -36,7 +36,7 @@ public class CellContext {
 
   public void applyCellStyleToCell(Cell cell) {
     if (cell != null) {
-      if (condition == null || (condition != null && condition.apply(cell))) {
+      if (condition == null || (condition.apply(cell))) {
         if (cellStyle != null) {
           cellStyleContext.addCellStyleToCell(cell, cellStyle);
         }

@@ -4,7 +4,7 @@ public enum ScriptFramework {
   THYMELEAF("thymeleaf"),
   GROOVY_TEMPLATES("groovy");
 
-  private String framework;
+  private final String framework;
 
   ScriptFramework(String framework) {
     this.framework = framework;

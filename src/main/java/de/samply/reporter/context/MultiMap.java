@@ -8,20 +8,9 @@ import java.util.Set;
 
 public class MultiMap {
 
-  private Map<String, Object> rootMap = new HashMap<>();
+  private final Map<String, Object> rootMap = new HashMap<>();
 
-  private class MapReference {
-
-    private Map map;
-
-    public MapReference(Map map) {
-      this.map = map;
-    }
-
-    public Map getMap() {
-      return map;
-    }
-
+  private record MapReference(Map map) {
   }
 
   public void put(Object value, String... keys) {
@@ -67,8 +56,8 @@ public class MultiMap {
     return result;
   }
 
-  private Object fetchRealValue (Object value){
-    return (value instanceof MapReference) ? ((MapReference) value).getMap() : value;
+  private Object fetchRealValue(Object value) {
+    return (value instanceof MapReference) ? ((MapReference) value).map() : value;
   }
 
   public List<Object> getAll(String... keys) {

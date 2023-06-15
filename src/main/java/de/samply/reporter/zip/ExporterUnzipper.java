@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ExporterUnzipper {
 
-  private Path tempFilesDirectory;
+  private final Path tempFilesDirectory;
 
   public ExporterUnzipper(
       @Value(ReporterConst.TEMP_FILES_DIRECTORY_SV) String tempFilesDirectory) {
@@ -89,8 +90,8 @@ public class ExporterUnzipper {
   }
 
   private Path[] fetchFilesFromDirectory(Path directory) throws ExporterUnzipperException {
-    try {
-      return Files.walk(directory).filter(path -> !Files.isDirectory(path)).toArray(Path[]::new);
+    try (Stream<Path> directoryStream = Files.walk(directory)) {
+      return directoryStream.filter(path -> !Files.isDirectory(path)).toArray(Path[]::new);
     } catch (IOException e) {
       throw new ExporterUnzipperException(e);
     }

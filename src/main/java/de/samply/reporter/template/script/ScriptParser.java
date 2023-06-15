@@ -12,8 +12,8 @@ public class ScriptParser {
     return readTemplateAndParseScripts(Files.readString(templatePath));
   }
 
-  public static String readTemplateAndParseScripts(String template) throws IOException {
-    AtomicReference<String> result = new AtomicReference(template);
+  public static String readTemplateAndParseScripts(String template) {
+    AtomicReference<String> result = new AtomicReference<>(template);
     Arrays.stream(ScriptFramework.values()).forEach(scriptFramework ->
         result.set(result.get()
             .replace(scriptFramework.getStartTag(),
@@ -28,13 +28,11 @@ public class ScriptParser {
       int index1 = qualityReportTemplate.indexOf("<exporter");
       int index2 = qualityReportTemplate.substring(index1).indexOf(">");
       int index3 = qualityReportTemplate.indexOf("</exporter>");
-      StringBuilder stringBuilder = new StringBuilder();
-      stringBuilder.append(qualityReportTemplate.substring(0, index1 + index2 + 1));
-      stringBuilder.append("<![CDATA[");
-      stringBuilder.append(qualityReportTemplate.substring(index1 + index2 + 1, index3));
-      stringBuilder.append("]]>");
-      stringBuilder.append(qualityReportTemplate.substring(index3));
-      qualityReportTemplate = stringBuilder.toString();
+      qualityReportTemplate = qualityReportTemplate.substring(0, index1 + index2 + 1)
+          + "<![CDATA["
+          + qualityReportTemplate.substring(index1 + index2 + 1, index3)
+          + "]]>"
+          + qualityReportTemplate.substring(index3);
     }
     return qualityReportTemplate;
   }
