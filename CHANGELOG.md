@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Report Status
 - Context and CellContext for Engines
 - Report examples
+- Logs for report generation
 
 
 ### Changed

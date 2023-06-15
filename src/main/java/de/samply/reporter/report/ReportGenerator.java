@@ -17,6 +17,8 @@ import de.samply.reporter.template.SheetTemplate;
 import de.samply.reporter.template.script.Script;
 import de.samply.reporter.utils.ExternalSheetUtils;
 import de.samply.reporter.utils.ExternalSheetUtilsException;
+import de.samply.reporter.utils.FileUtils;
+import de.samply.reporter.utils.PercentageLogger;
 import de.samply.reporter.zip.ExporterUnzipper;
 import de.samply.reporter.zip.ExporterUnzipperException;
 import java.io.FileOutputStream;
@@ -36,6 +38,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.streaming.SXSSFSheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
@@ -43,6 +47,7 @@ import org.springframework.util.FileSystemUtils;
 @Component
 public class ReportGenerator {
 
+  private final static Logger logger = LoggerFactory.getLogger(ReportGenerator.class);
   private final ExporterClient exporterClient;
   private final ExporterUnzipper exporterUnzipper;
   private final ScriptEngineManager scriptEngineManager;
@@ -75,15 +80,24 @@ public class ReportGenerator {
   }
 
   private void generate(ReportTemplate template, String filePath, ReportMetaInfo reportMetaInfo) {
+    logger.info("Extracting paths...");
     Path[] paths = extractPaths(filePath);
+    logger.info("Generating context...");
     Context context = contextGenerator.generate(template, paths);
-    Map<Script, ScriptResult> scriptResultMap = scriptEngineManager.generateRawQualityReport(
+    logger.info("Generating raw report...");
+    Map<Script, ScriptResult> scriptResultMap = scriptEngineManager.generateRawReport(
         template, context);
+    logger.info("Generating excel file");
     Workbook workbook = new SXSSFWorkbook(workbookWindow);
+    logger.info("Filling excel file with data...");
     fillWorkbookWithData(workbook, template, scriptResultMap);
+    logger.info("Adding format to excel file...");
     addFormatToWorkbook(workbook, template, context);
+    logger.info("Writing excel file...");
     writeWorkbook(reportMetaInfo.path(), workbook);
+    logger.info("Removing temporal files...");
     removeTemporalFiles(paths[0].getParent(), scriptResultMap.values());
+    logger.info("Excel file generated satisfactory.");
   }
 
   private void removeTemporalFiles(Path sourceFilesDirectory,
@@ -128,6 +142,7 @@ public class ReportGenerator {
       Map<Script, ScriptResult> scriptResultMap) {
     template.getSheetTemplates()
         .forEach(sheetTemplate -> {
+          logger.info("Adding sheet " + sheetTemplate.getName() + "...");
           if (sheetTemplate.getFileUrl() != null || sheetTemplate.getFilePath() != null) {
             addSheetFromSourceExcelFile(workbook, sheetTemplate);
           } else {
@@ -151,8 +166,10 @@ public class ReportGenerator {
     if (template.getValuesScript() != null) {
       ScriptResult result = scriptResultMap.get(template.getValuesScript().getScript());
       if (result != null) {
-        fillSheetWithData(sheet, template, result);
+        fillSheetWithData(sheet, result);
+        logger.info("Adding autosize to sheet " + template.getName() + "...");
         autoSizeSheet(sheet);
+        logger.info("Adding auto filter to sheet " + template.getName() + "...");
         addAutoFilter(sheet);
       }
     }
@@ -168,6 +185,7 @@ public class ReportGenerator {
 
   private void createHeaderRow(Workbook workbook, Sheet sheet, SheetTemplate template) {
     if (!template.getColumnTemplates().isEmpty()) {
+      logger.info("Creating header row for sheet " + template.getName() + "...");
       Row row = sheet.createRow(0);
       AtomicInteger counter = new AtomicInteger(0);
       template.getColumnTemplates().forEach(
@@ -189,29 +207,33 @@ public class ReportGenerator {
     }
   }
 
-  private void fillSheetWithData(Sheet sheet, SheetTemplate template, ScriptResult result) {
+  private void fillSheetWithData(Sheet sheet, ScriptResult result) {
     try {
-      fillSheetWithDataWithoutExceptionHandling(sheet, template, result);
+      fillSheetWithDataWithoutExceptionHandling(sheet, result);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  private void fillSheetWithDataWithoutExceptionHandling(Sheet sheet, SheetTemplate template,
-      ScriptResult result)
+  private void fillSheetWithDataWithoutExceptionHandling(Sheet sheet, ScriptResult result)
       throws IOException {
     AtomicInteger rowIndex = new AtomicInteger(sheet.getLastRowNum() + 1);
+    PercentageLogger percentageLogger = new PercentageLogger(logger,
+        (int) FileUtils.fetchNumberOfLines(result.getRawResult()),
+        "Filling sheet" + sheet.getSheetName() + " with data...");
     Files.readAllLines(result.getRawResult())
         .forEach(
-            line -> fillRowWithData(sheet.createRow(rowIndex.getAndIncrement()), line, result));
+            line -> {
+              fillRowWithData(sheet.createRow(rowIndex.getAndIncrement()), line, result);
+              percentageLogger.incrementCounter();
+            });
   }
 
   private void fillRowWithData(Row row, String line, ScriptResult result) {
     AtomicInteger columnIndex = new AtomicInteger(0);
-    Arrays.stream(line.split(result.getCsvConfig().delimiter())).forEach(value -> {
-      row.createCell(columnIndex.getAndIncrement())
-          .setCellValue((value != null) ? value : ReporterConst.EMPTY_EXCEL_CELL);
-    });
+    Arrays.stream(line.split(result.getCsvConfig().delimiter())).forEach(
+        value -> row.createCell(columnIndex.getAndIncrement())
+            .setCellValue((value != null) ? value : ReporterConst.EMPTY_EXCEL_CELL));
   }
 
   private void autoSizeSheet(Sheet sheet) {
@@ -239,14 +261,14 @@ public class ReportGenerator {
     template.getSheetTemplates().forEach(sheetTemplate -> {
       CellStyleContext cellStyleContext = new CellStyleContext(workbook);
       AtomicInteger columnNumber = new AtomicInteger(0);
-      // Add general format to all cells
+      logger.info("Adding general format to all cells...");
       sheetTemplate.getFormatScripts().forEach(formatScript -> {
         if (formatScript.getScript() != null) {
           addFormatToAllCellsOfASheet(workbook, sheetTemplate, cellStyleContext, context,
               formatScript.getScript());
         }
       });
-      // Add column format to column cells
+      logger.info("Adding column format to column cells...");
       sheetTemplate.getColumnTemplates().forEach(
           columnTemplate -> addFormatToWorkbook(workbook, sheetTemplate, columnTemplate,
               columnNumber.getAndIncrement(), cellStyleContext, context));
@@ -257,7 +279,11 @@ public class ReportGenerator {
       ColumnTemplate columnTemplate, int columnNumber, CellStyleContext cellStyleContext,
       Context context) {
     Sheet sheet = workbook.getSheet(sheetTemplate.getName());
+    logger.info("Adding header format to column " + columnTemplate.getName() + " in sheet "
+        + sheetTemplate.getName() + "...");
     addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
+    logger.info("Adding value format to column " + columnTemplate.getName() + " in sheet "
+        + sheetTemplate.getName() + "...");
     addValueFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
   }
 
@@ -291,8 +317,13 @@ public class ReportGenerator {
   private void addFormatToAllCellsOfASheet(Workbook workbook, SheetTemplate sheetTemplate,
       CellStyleContext cellStyleContext, Context context, Script script) {
     CellContext cellContext = fetchCellContext(script, cellStyleContext, context);
-    workbook.getSheet(sheetTemplate.getName())
-        .forEach(row -> row.forEach(cell -> cellContext.applyCellStyleToCell(cell)));
+    Sheet sheet = workbook.getSheet(sheetTemplate.getName());
+    PercentageLogger percentageLogger = new PercentageLogger(logger, sheet.getLastRowNum(),
+        "Adding format to all cells of sheet " + sheetTemplate.getName() + "...");
+    sheet.forEach(row -> {
+      row.forEach(cellContext::applyCellStyleToCell);
+      percentageLogger.incrementCounter();
+    });
   }
 
   private CellContext fetchCellContext(Script script, CellStyleContext cellStyleContext,
