@@ -15,7 +15,7 @@ import java.io.Writer;
 
 public class GroovyTemplatesEngine extends ScriptEngineImpl {
 
-  private GStringTemplateEngine engine = new GStringTemplateEngine();
+  private final GStringTemplateEngine engine = new GStringTemplateEngine();
 
   @Override
   public ScriptFramework getScriptFramework() {
@@ -35,7 +35,7 @@ public class GroovyTemplatesEngine extends ScriptEngineImpl {
 
   private void generateResult(ScriptResult result, Script script, Binding binding)
       throws ScriptEngineException {
-    try (FileWriter fileWriter = new FileWriter(result.getRawResult().toFile())) {
+    try (FileWriter fileWriter = new FileWriter(result.rawResult().toFile())) {
       generateResult(script, binding, fileWriter);
     } catch (IOException e) {
       throw new ScriptEngineException(e);

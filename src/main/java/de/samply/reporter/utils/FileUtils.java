@@ -4,6 +4,7 @@ import de.samply.reporter.app.ReporterConst;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class FileUtils {
@@ -14,7 +15,9 @@ public class FileUtils {
   }
 
   public static long fetchNumberOfLines(Path path) throws IOException {
-    return Files.lines(path).count();
+    try (Stream<String> pathStream = Files.lines(path)) {
+      return pathStream.count();
+    }
   }
 
 

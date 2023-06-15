@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 public class EnvironmentUtils {
 
-  private static Map<String, String> environmentVariables = new HashMap<>();
+  private final static Map<String, String> environmentVariables = new HashMap<>();
 
   public EnvironmentUtils(@Autowired Environment environment) {
     addKeyValuesFromEnvironment((ConfigurableEnvironment) environment);
@@ -26,13 +26,12 @@ public class EnvironmentUtils {
   }
 
   private void addKeyValuesFromEnvironment(Map<String, Object> keyValues) {
-    keyValues.keySet().stream()
-        .forEach(key -> environmentVariables.put(key, (String) keyValues.get(key)));
+    keyValues.keySet().forEach(key -> environmentVariables.put(key, (String) keyValues.get(key)));
   }
 
   private void addKeyValuesFromEnvironmentPropertySources(ConfigurableEnvironment environment) {
     environment.getPropertySources().stream().filter(p -> p instanceof EnumerablePropertySource)
-        .map(p -> ((EnumerablePropertySource) p).getPropertyNames()).flatMap(Arrays::stream)
+        .map(p -> ((EnumerablePropertySource<?>) p).getPropertyNames()).flatMap(Arrays::stream)
         .distinct().forEach(key -> environmentVariables.put(key, environment.getProperty(key)));
   }
 

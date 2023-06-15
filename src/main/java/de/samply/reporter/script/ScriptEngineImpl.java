@@ -25,10 +25,10 @@ public abstract class ScriptEngineImpl implements ScriptEngine {
 
   protected void removeUnnecessaryEmptyLines(ScriptResult result, CsvConfig csvConfig)
       throws ScriptEngineException {
-    Path tempPath = result.getRawResult().getParent().resolve(fetchRandomFilename());
-    removeUnnecessaryEmptyLinesAndCopyToTempPath(result.getRawResult(), tempPath, csvConfig);
-    deleteFile(result.getRawResult());
-    renameFile(tempPath, result.getRawResult());
+    Path tempPath = result.rawResult().getParent().resolve(fetchRandomFilename());
+    removeUnnecessaryEmptyLinesAndCopyToTempPath(result.rawResult(), tempPath, csvConfig);
+    deleteFile(result.rawResult());
+    renameFile(tempPath, result.rawResult());
   }
 
   private void deleteFile(Path path) throws ScriptEngineException {

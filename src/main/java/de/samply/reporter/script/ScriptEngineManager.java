@@ -18,10 +18,10 @@ import org.springframework.stereotype.Component;
 public class ScriptEngineManager {
 
   private final Logger logger = LoggerFactory.getLogger(ScriptEngineManager.class);
-  private ScriptEngine[] scriptEngines = {new ThymeleafEngine(), new GroovyTemplatesEngine()};
-  private Map<ScriptFramework, ScriptEngine> idScriptEngineMap = new HashMap<>();
+  private final Map<ScriptFramework, ScriptEngine> idScriptEngineMap = new HashMap<>();
 
   public ScriptEngineManager() {
+    ScriptEngine[] scriptEngines = {new ThymeleafEngine(), new GroovyTemplatesEngine()};
     Arrays.stream(scriptEngines).forEach(
         scriptEngine -> idScriptEngineMap.put(scriptEngine.getScriptFramework(), scriptEngine));
   }

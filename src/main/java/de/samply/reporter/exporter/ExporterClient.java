@@ -33,7 +33,7 @@ import reactor.core.publisher.Mono;
 public class ExporterClient {
 
   private final static Logger logger = LoggerFactory.getLogger(ExporterClient.class);
-  private WebClient webClient;
+  private final WebClient webClient;
   private final String exporterApiKey;
   private final String exporterQuery;
   private final String exporterQueryFormat;
@@ -71,10 +71,12 @@ public class ExporterClient {
     RequestBodySpec requestBodySpec = webClient.post().uri(
         uriBuilder -> uriBuilder.path(ReporterConst.EXPORTER_REQUEST)
             .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
-            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT, exporter.getQueryFormat())
+            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT,
+                exporter.getQueryFormat())
             .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
                 Optional.of(exporter.getTemplateId()))
-            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT, exporter.getOutputFormat())
+            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
+                exporter.getOutputFormat())
             .build()).header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey);
     if (exporter.getTemplate() != null && exporter.getTemplate().trim().length() > 0) {
       requestBodySpec.contentType(MediaType.APPLICATION_XML);
@@ -149,15 +151,16 @@ public class ExporterClient {
 
   private void waitUntilNextAttempt() {
     try {
-      Thread.sleep(timeInSecondsToWaitBetweenAttemptsToGetExport * 1000);
+      Thread.sleep(timeInSecondsToWaitBetweenAttemptsToGetExport * 1000L);
     } catch (InterruptedException e) {
       logger.error(ExceptionUtils.getStackTrace(e));
     }
   }
 
   private String fetchFilename(ClientResponse clientResponse) {
-    List<String> header = clientResponse.headers().header(ReporterConst.HTTP_HEADER_CONTENT_DISPOSITION);
-    return (header != null && header.size() > 0) ? fetchFilenameFromHeader(header.get(0))
+    List<String> header = clientResponse.headers()
+        .header(ReporterConst.HTTP_HEADER_CONTENT_DISPOSITION);
+    return (header.size() > 0) ? fetchFilenameFromHeader(header.get(0))
         : FileUtils.fetchRandomFilename(ReporterConst.DEFAULT_EXPORTER_FILE_EXTENSION);
 
   }

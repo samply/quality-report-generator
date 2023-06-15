@@ -21,9 +21,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReportMetaInfoManager {
 
-  private Path reportsMetaInfoFile;
-  private Path reportsDirectory;
-  private VariablesReplacer variablesReplacer;
+  private final Path reportsMetaInfoFile;
+  private final Path reportsDirectory;
+  private final VariablesReplacer variablesReplacer;
 
   public ReportMetaInfoManager(
       VariablesReplacer variablesReplacer,
@@ -107,7 +107,7 @@ public class ReportMetaInfoManager {
     Files.readAllLines(reportsMetaInfoFile)
         .forEach(line -> {
           ReportMetaInfo reportMetaInfo = ReportMetaInfo.create(reportsDirectory, line);
-          if (!filter.isPresent() || filter.get().apply(reportMetaInfo)) {
+          if (filter.isEmpty() || filter.get().apply(reportMetaInfo)) {
             result.add(reportMetaInfo);
           }
         });

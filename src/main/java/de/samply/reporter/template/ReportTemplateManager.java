@@ -1,20 +1,25 @@
 package de.samply.reporter.template;
 
+import static java.nio.file.Files.exists;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.list;
+import static java.nio.file.Files.readString;
+
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import de.samply.reporter.app.ReporterConst;
 import de.samply.reporter.template.script.ScriptParser;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ReportTemplateManager {
 
-  private Map<String, ReportTemplate> idQualityReportTemplateMap = new HashMap<>();
+  private final Map<String, ReportTemplate> idQualityReportTemplateMap = new HashMap<>();
 
   public ReportTemplateManager(
       @Value(ReporterConst.REPORT_TEMPLATE_DIRECTORY_SV) String qualityReportTemplateDirectory
@@ -33,9 +38,10 @@ public class ReportTemplateManager {
 
   private void loadTemplatesWithoutExceptionHandling(Path templateDirectory)
       throws IOException {
-    if (Files.exists(templateDirectory)) {
-      Files.list(templateDirectory).filter(path -> !Files.isDirectory(path))
-          .forEach(filePath -> loadTemplate(filePath));
+    if (exists(templateDirectory)) {
+      try (Stream<Path> pathStream = list(templateDirectory)) {
+        pathStream.filter(path -> !isDirectory(path)).forEach(this::loadTemplate);
+      }
     }
   }
 
@@ -53,7 +59,7 @@ public class ReportTemplateManager {
   }
 
   public ReportTemplate fetchTemplate(Path templatePath) throws IOException {
-    return fetchTemplate(Files.readString(templatePath));
+    return fetchTemplate(readString(templatePath));
   }
 
   public ReportTemplate fetchTemplate(String template) throws IOException {

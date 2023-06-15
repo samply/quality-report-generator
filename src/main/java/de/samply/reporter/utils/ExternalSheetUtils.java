@@ -3,7 +3,8 @@ package de.samply.reporter.utils;
 import de.samply.reporter.template.SheetTemplate;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.poi.ss.usermodel.Cell;
@@ -45,17 +46,17 @@ public class ExternalSheetUtils {
   private static InputStream fetchInputStream(SheetTemplate template)
       throws ExternalSheetUtilsException {
     try {
-      return fetchInputStreamWihoutExceptionHandling(template);
-    } catch (IOException e) {
+      return fetchInputStreamWithoutExceptionHandling(template);
+    } catch (IOException | URISyntaxException e) {
       throw new ExternalSheetUtilsException(e);
     }
   }
 
-  private static InputStream fetchInputStreamWihoutExceptionHandling(SheetTemplate template)
-      throws IOException {
+  private static InputStream fetchInputStreamWithoutExceptionHandling(SheetTemplate template)
+      throws IOException, URISyntaxException {
     InputStream result = null;
     if (template.getFileUrl() != null) {
-      result = new URL(template.getFileUrl()).openStream();
+      result = new URI(template.getFileUrl()).toURL().openStream();
     }
     if (template.getFilePath() != null) {
       result = Files.newInputStream(Path.of(template.getFilePath()));
@@ -94,24 +95,12 @@ public class ExternalSheetUtils {
         targetCell.setCellStyle(sourceCell.getCellStyle());
 
         switch (sourceCell.getCellType()) {
-          case BLANK:
-            targetCell.setCellValue("");
-            break;
-          case BOOLEAN:
-            targetCell.setCellValue(sourceCell.getBooleanCellValue());
-            break;
-          case ERROR:
-            targetCell.setCellValue(sourceCell.getErrorCellValue());
-            break;
-          case FORMULA:
-            targetCell.setCellFormula(sourceCell.getCellFormula());
-            break;
-          case NUMERIC:
-            targetCell.setCellValue(sourceCell.getNumericCellValue());
-            break;
-          case STRING:
-            targetCell.setCellValue(sourceCell.getRichStringCellValue());
-            break;
+          case BLANK -> targetCell.setCellValue("");
+          case BOOLEAN -> targetCell.setCellValue(sourceCell.getBooleanCellValue());
+          case ERROR -> targetCell.setCellValue(sourceCell.getErrorCellValue());
+          case FORMULA -> targetCell.setCellFormula(sourceCell.getCellFormula());
+          case NUMERIC -> targetCell.setCellValue(sourceCell.getNumericCellValue());
+          case STRING -> targetCell.setCellValue(sourceCell.getRichStringCellValue());
         }
         copyMergedRegions(sourceCell, sourceRow, targetRow);
         copyCellStyles(sourceCell, targetCell);
@@ -143,13 +132,12 @@ public class ExternalSheetUtils {
   private static CellRangeAddress getAdjustedMergedRegion(CellRangeAddress mergedRegion,
       Row newRow) {
     int newRowNum = newRow.getRowNum();
-    int firstRow = mergedRegion.getFirstRow();
     int lastRow = mergedRegion.getLastRow();
     int firstCol = mergedRegion.getFirstColumn();
     int lastCol = mergedRegion.getLastColumn();
 
     return new CellRangeAddress(
-        newRowNum + (firstRow - mergedRegion.getFirstRow()),
+        newRowNum,
         newRowNum + (lastRow - mergedRegion.getFirstRow()),
         firstCol,
         lastCol

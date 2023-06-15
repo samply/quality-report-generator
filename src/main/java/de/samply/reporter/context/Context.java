@@ -23,12 +23,12 @@ import org.slf4j.LoggerFactory;
 public class Context {
 
   private final Logger logger = LoggerFactory.getLogger(Context.class);
-  private Path resultsDirectory;
-  private ReportTemplate reportTemplate;
-  private Path[] sourcePaths;
-  private CsvConfig csvConfig;
-  private Map<String, Function<String[], String>> functionMap = new HashMap<>();
-  private MultiMap multiMap = new MultiMap();
+  private final Path resultsDirectory;
+  private final ReportTemplate reportTemplate;
+  private final Path[] sourcePaths;
+  private final CsvConfig csvConfig;
+  private final Map<String, Function<String[], String>> functionMap = new HashMap<>();
+  private final MultiMap multiMap = new MultiMap();
 
   public Context(Path resultsDirectory, ReportTemplate reportTemplate,
       Path[] sourcePaths, CsvConfig csvConfig) {
@@ -129,7 +129,7 @@ public class Context {
         .setRecordSeparator(csvConfig.endOfLine())
         .build()
         .parse(bufferedReader)) {
-      csvParser.getRecords().forEach(record -> recordConsumer.accept(record));
+      csvParser.getRecords().forEach(recordConsumer);
     }
   }
 
