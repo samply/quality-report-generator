@@ -142,7 +142,7 @@ public class ReportGenerator {
       Map<Script, ScriptResult> scriptResultMap) {
     template.getSheetTemplates()
         .forEach(sheetTemplate -> {
-          logger.info("Adding sheet " + sheetTemplate.getName() + "...");
+          logger.info("Adding sheet '" + sheetTemplate.getName() + "'...");
           if (sheetTemplate.getFileUrl() != null || sheetTemplate.getFilePath() != null) {
             addSheetFromSourceExcelFile(workbook, sheetTemplate);
           } else {
@@ -167,9 +167,9 @@ public class ReportGenerator {
       ScriptResult result = scriptResultMap.get(template.getValuesScript().getScript());
       if (result != null) {
         fillSheetWithData(sheet, result);
-        logger.info("Adding autosize to sheet " + template.getName() + "...");
+        logger.info("Adding autosize to sheet '" + template.getName() + "'...");
         autoSizeSheet(sheet);
-        logger.info("Adding auto filter to sheet " + template.getName() + "...");
+        logger.info("Adding auto filter to sheet '" + template.getName() + "'...");
         addAutoFilter(sheet);
       }
     }
@@ -185,7 +185,7 @@ public class ReportGenerator {
 
   private void createHeaderRow(Workbook workbook, Sheet sheet, SheetTemplate template) {
     if (!template.getColumnTemplates().isEmpty()) {
-      logger.info("Creating header row for sheet " + template.getName() + "...");
+      logger.info("Creating header row for sheet '" + template.getName() + "'...");
       Row row = sheet.createRow(0);
       AtomicInteger counter = new AtomicInteger(0);
       template.getColumnTemplates().forEach(
@@ -279,11 +279,11 @@ public class ReportGenerator {
       ColumnTemplate columnTemplate, int columnNumber, CellStyleContext cellStyleContext,
       Context context) {
     Sheet sheet = workbook.getSheet(sheetTemplate.getName());
-    logger.info("Adding header format to column " + columnTemplate.getName() + " in sheet "
-        + sheetTemplate.getName() + "...");
+    logger.info("Adding header format to column '" + columnTemplate.getName() + "' in sheet '"
+        + sheetTemplate.getName() + "'...");
     addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
-    logger.info("Adding value format to column " + columnTemplate.getName() + " in sheet "
-        + sheetTemplate.getName() + "...");
+    logger.info("Adding value format to column '" + columnTemplate.getName() + "' in sheet '"
+        + sheetTemplate.getName() + "'...");
     addValueFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
   }
 
@@ -319,7 +319,7 @@ public class ReportGenerator {
     CellContext cellContext = fetchCellContext(script, cellStyleContext, context);
     Sheet sheet = workbook.getSheet(sheetTemplate.getName());
     PercentageLogger percentageLogger = new PercentageLogger(logger, sheet.getLastRowNum(),
-        "Adding format to all cells of sheet " + sheetTemplate.getName() + "...");
+        "Adding format to all cells of sheet '" + sheetTemplate.getName() + "'...");
     sheet.forEach(row -> {
       row.forEach(cellContext::applyCellStyleToCell);
       percentageLogger.incrementCounter();
