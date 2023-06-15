@@ -10,11 +10,14 @@ import de.samply.reporter.template.script.ScriptReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ScriptEngineManager {
 
+  private final Logger logger = LoggerFactory.getLogger(ScriptEngineManager.class);
   private ScriptEngine[] scriptEngines = {new ThymeleafEngine(), new GroovyTemplatesEngine()};
   private Map<ScriptFramework, ScriptEngine> idScriptEngineMap = new HashMap<>();
 
@@ -23,11 +26,13 @@ public class ScriptEngineManager {
         scriptEngine -> idScriptEngineMap.put(scriptEngine.getScriptFramework(), scriptEngine));
   }
 
-  public Map<Script, ScriptResult> generateRawQualityReport(ReportTemplate template,
+  public Map<Script, ScriptResult> generateRawReport(ReportTemplate template,
       Context context) {
     Map<Script, ScriptResult> results = new HashMap<>();
     addScriptToResultsAndGenerateRawResult(template.getInitScript(), results, context);
     template.getSheetTemplates().forEach(sheetTemplate -> {
+      logger.info(
+          "Generating temporal file with raw data for template " + sheetTemplate.getName() + "...");
       addScriptToResultsAndGenerateRawResult(sheetTemplate.getValuesScript(), results, context);
     });
     return results;
@@ -65,7 +70,8 @@ public class ScriptEngineManager {
     return scriptFramework;
   }
 
-  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext, Context context)
+  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext,
+      Context context)
       throws ScriptEngineException {
     return idScriptEngineMap.get(fetchScriptFramework(script))
         .generateCellContext(script, cellStyleContext, context);
