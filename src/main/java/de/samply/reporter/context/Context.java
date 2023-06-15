@@ -27,7 +27,7 @@ public class Context {
   private ReportTemplate reportTemplate;
   private Path[] sourcePaths;
   private CsvConfig csvConfig;
-  private Map<String, Function<String[],String>> functionMap = new HashMap<>();
+  private Map<String, Function<String[], String>> functionMap = new HashMap<>();
   private MultiMap multiMap = new MultiMap();
 
   public Context(Path resultsDirectory, ReportTemplate reportTemplate,
@@ -46,11 +46,11 @@ public class Context {
     return csvConfig;
   }
 
-  public void defineFunction(String functionName, Function<String[], String> function){
+  public void defineFunction(String functionName, Function<String[], String> function) {
     functionMap.put(functionName, function);
   }
 
-  public String executeFunction(String functionName, String... parameters){
+  public String executeFunction(String functionName, String... parameters) {
     Function<String[], String> function = functionMap.get(functionName);
     return (function != null) ? function.apply(parameters) : "";
   }
@@ -83,7 +83,7 @@ public class Context {
     return multiMap.getAll(keys);
   }
 
-  public Set<String> getKeySet(String... keys){
+  public Set<String> getKeySet(String... keys) {
     return multiMap.getKeySet(keys);
   }
 
@@ -131,6 +131,30 @@ public class Context {
         .parse(bufferedReader)) {
       csvParser.getRecords().forEach(record -> recordConsumer.accept(record));
     }
+  }
+
+  public boolean hasOnlyHeaders(Path path) throws IOException {
+    try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
+      int lineCount = 0;
+      while (reader.readLine() != null) {
+        lineCount++;
+        if (lineCount > 1) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  public List<String> fetchHeaders(Path path) throws IOException {
+    String[] result = {};
+    try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
+      String line = reader.readLine();
+      if (line != null && line.trim().length() > 0) {
+        result = line.split(csvConfig.delimiter());
+      }
+    }
+    return List.of(result);
   }
 
 }

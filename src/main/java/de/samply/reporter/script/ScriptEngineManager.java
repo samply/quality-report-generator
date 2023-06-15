@@ -1,14 +1,15 @@
 package de.samply.reporter.script;
 
 import de.samply.reporter.context.CellContext;
+import de.samply.reporter.context.CellStyleContext;
 import de.samply.reporter.context.Context;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.template.script.Script;
 import de.samply.reporter.template.script.ScriptFramework;
+import de.samply.reporter.template.script.ScriptReference;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,13 +26,19 @@ public class ScriptEngineManager {
   public Map<Script, ScriptResult> generateRawQualityReport(ReportTemplate template,
       Context context) {
     Map<Script, ScriptResult> results = new HashMap<>();
+    addScriptToResultsAndGenerateRawResult(template.getInitScript(), results, context);
     template.getSheetTemplates().forEach(sheetTemplate -> {
-      if (sheetTemplate.getValuesScript() != null) {
-        Script script = sheetTemplate.getValuesScript().getScript();
-        results.put(script, generateRawResult(script, context));
-      }
+      addScriptToResultsAndGenerateRawResult(sheetTemplate.getValuesScript(), results, context);
     });
     return results;
+  }
+
+  private void addScriptToResultsAndGenerateRawResult(ScriptReference scriptReference,
+      Map<Script, ScriptResult> results, Context context) {
+    if (scriptReference != null) {
+      Script script = scriptReference.getScript();
+      results.put(script, generateRawResult(script, context));
+    }
   }
 
   private ScriptResult generateRawResult(Script script, Context context) {
@@ -58,8 +65,10 @@ public class ScriptEngineManager {
     return scriptFramework;
   }
 
-  public CellContext generateCellContext(Script script, Workbook workbook) throws ScriptEngineException {
-    return idScriptEngineMap.get(fetchScriptFramework(script)).generateCellContext(script, workbook);
+  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext, Context context)
+      throws ScriptEngineException {
+    return idScriptEngineMap.get(fetchScriptFramework(script))
+        .generateCellContext(script, cellStyleContext, context);
   }
 
 }

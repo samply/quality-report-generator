@@ -2,6 +2,7 @@ package de.samply.reporter.report;
 
 import de.samply.reporter.app.ReporterConst;
 import de.samply.reporter.context.CellContext;
+import de.samply.reporter.context.CellStyleContext;
 import de.samply.reporter.context.Context;
 import de.samply.reporter.context.ContextGenerator;
 import de.samply.reporter.exporter.ExporterClient;
@@ -80,7 +81,7 @@ public class ReportGenerator {
         template, context);
     Workbook workbook = new SXSSFWorkbook(workbookWindow);
     fillWorkbookWithData(workbook, template, scriptResultMap);
-    addFormatToWorkbook(workbook, template);
+    addFormatToWorkbook(workbook, template, context);
     writeWorkbook(reportMetaInfo.path(), workbook);
     removeTemporalFiles(paths[0].getParent(), scriptResultMap.values());
   }
@@ -166,13 +167,15 @@ public class ReportGenerator {
   }
 
   private void createHeaderRow(Workbook workbook, Sheet sheet, SheetTemplate template) {
-    Row row = sheet.createRow(0);
-    AtomicInteger counter = new AtomicInteger(0);
-    template.getColumnTemplates().forEach(
-        columnTemplate -> row.createCell(counter.getAndIncrement())
-            .setCellValue(columnTemplate.getName()));
-    sheet.createFreezePane(0, 1);
-    boldHeaderRow(workbook, row);
+    if (!template.getColumnTemplates().isEmpty()) {
+      Row row = sheet.createRow(0);
+      AtomicInteger counter = new AtomicInteger(0);
+      template.getColumnTemplates().forEach(
+          columnTemplate -> row.createCell(counter.getAndIncrement())
+              .setCellValue(columnTemplate.getName()));
+      sheet.createFreezePane(0, 1);
+      boldHeaderRow(workbook, row);
+    }
   }
 
   private void boldHeaderRow(Workbook workbook, Row titleRow) {
@@ -232,37 +235,49 @@ public class ReportGenerator {
     sheet.setAutoFilter(cra);
   }
 
-  private void addFormatToWorkbook(Workbook workbook, ReportTemplate template) {
+  private void addFormatToWorkbook(Workbook workbook, ReportTemplate template, Context context) {
     template.getSheetTemplates().forEach(sheetTemplate -> {
+      CellStyleContext cellStyleContext = new CellStyleContext(workbook);
       AtomicInteger columnNumber = new AtomicInteger(0);
+      // Add general format to all cells
+      sheetTemplate.getFormatScripts().forEach(formatScript -> {
+        if (formatScript.getScript() != null) {
+          addFormatToAllCellsOfASheet(workbook, sheetTemplate, cellStyleContext, context,
+              formatScript.getScript());
+        }
+      });
+      // Add column format to column cells
       sheetTemplate.getColumnTemplates().forEach(
           columnTemplate -> addFormatToWorkbook(workbook, sheetTemplate, columnTemplate,
-              columnNumber.getAndIncrement()));
+              columnNumber.getAndIncrement(), cellStyleContext, context));
     });
   }
 
   private void addFormatToWorkbook(Workbook workbook, SheetTemplate sheetTemplate,
-      ColumnTemplate columnTemplate, int columnNumber) {
+      ColumnTemplate columnTemplate, int columnNumber, CellStyleContext cellStyleContext,
+      Context context) {
     Sheet sheet = workbook.getSheet(sheetTemplate.getName());
-    addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber);
-    addValueFormatToWorkbook(columnTemplate, sheet, columnNumber);
+    addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
+    addValueFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
   }
 
-  private void addHeaderFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber) {
+  private void addHeaderFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber,
+      CellStyleContext cellStyleContext, Context context) {
     if (template.getHeaderFormatScript() != null) {
       Script script = template.getHeaderFormatScript().getScript();
       if (script != null) {
-        fetchCellContext(script, sheet.getWorkbook()).applyCellStyleToCell(
+        fetchCellContext(script, cellStyleContext, context).applyCellStyleToCell(
             sheet.getRow(0).getCell(columnNumber));
       }
     }
   }
 
-  private void addValueFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber) {
+  private void addValueFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber,
+      CellStyleContext cellStyleContext, Context context) {
     if (template.getValueFormatScript() != null) {
       Script script = template.getValueFormatScript().getScript();
       if (script != null) {
-        CellContext cellContext = fetchCellContext(script, sheet.getWorkbook());
+        CellContext cellContext = fetchCellContext(script, cellStyleContext, context);
         int lastRowNum = sheet.getLastRowNum();
         if (lastRowNum > 0) {
           for (int i = 1; i <= lastRowNum; i++) {
@@ -273,9 +288,17 @@ public class ReportGenerator {
     }
   }
 
-  private CellContext fetchCellContext(Script script, Workbook workbook) {
+  private void addFormatToAllCellsOfASheet(Workbook workbook, SheetTemplate sheetTemplate,
+      CellStyleContext cellStyleContext, Context context, Script script) {
+    CellContext cellContext = fetchCellContext(script, cellStyleContext, context);
+    workbook.getSheet(sheetTemplate.getName())
+        .forEach(row -> row.forEach(cell -> cellContext.applyCellStyleToCell(cell)));
+  }
+
+  private CellContext fetchCellContext(Script script, CellStyleContext cellStyleContext,
+      Context context) {
     try {
-      return scriptEngineManager.generateCellContext(script, workbook);
+      return scriptEngineManager.generateCellContext(script, cellStyleContext, context);
     } catch (ScriptEngineException e) {
       throw new RuntimeException(e);
     }

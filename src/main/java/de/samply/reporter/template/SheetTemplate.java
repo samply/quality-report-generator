@@ -29,6 +29,11 @@ public class SheetTemplate {
   @JsonProperty("column")
   private List<ColumnTemplate> columnTemplates = new ArrayList<>();
 
+  @JacksonXmlElementWrapper(useWrapping = false)
+  @JsonProperty("format-script")
+  private List<ScriptReference> formatScripts = new ArrayList<>();
+
+
   public ScriptReference getValuesScript() {
     return valuesScript;
   }
@@ -49,8 +54,7 @@ public class SheetTemplate {
     return columnTemplates;
   }
 
-  public void setColumnTemplates(
-      List<ColumnTemplate> columnTemplates) {
+  public void setColumnTemplates(List<ColumnTemplate> columnTemplates) {
     this.columnTemplates = columnTemplates;
   }
 
@@ -68,6 +72,14 @@ public class SheetTemplate {
 
   public void setFileUrl(String fileUrl) {
     this.fileUrl = fileUrl;
+  }
+
+  public List<ScriptReference> getFormatScripts() {
+    return formatScripts;
+  }
+
+  public void setFormatScripts(List<ScriptReference> formatScripts) {
+    this.formatScripts = formatScripts;
   }
 
 }
