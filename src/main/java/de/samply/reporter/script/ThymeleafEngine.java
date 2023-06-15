@@ -2,6 +2,7 @@ package de.samply.reporter.script;
 
 import de.samply.reporter.app.ReporterConst;
 import de.samply.reporter.context.CellContext;
+import de.samply.reporter.context.CellStyleContext;
 import de.samply.reporter.context.Context;
 import de.samply.reporter.template.script.Script;
 import de.samply.reporter.template.script.ScriptFramework;
@@ -9,7 +10,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.StringTemplateResolver;
@@ -34,11 +34,12 @@ public class ThymeleafEngine extends ScriptEngineImpl {
   }
 
   @Override
-  public CellContext generateCellContext(Script script, Workbook workbook)
+  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext, Context context)
       throws ScriptEngineException {
-    CellContext cellContext = new CellContext(workbook);
+    CellContext cellContext = new CellContext(cellStyleContext);
     org.thymeleaf.context.Context thymeleafContext = new org.thymeleaf.context.Context();
-    thymeleafContext.setVariable(ReporterConst.CONTEXT_VARIABLE, cellContext);
+    thymeleafContext.setVariable(ReporterConst.CONTEXT_VARIABLE, context);
+    thymeleafContext.setVariable(ReporterConst.CELL_CONTEXT_VARIABLE, cellStyleContext);
     generateResult(script, thymeleafContext, new StringWriter());
     return cellContext;
   }

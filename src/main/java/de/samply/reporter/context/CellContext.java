@@ -1,6 +1,9 @@
 package de.samply.reporter.context;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -8,13 +11,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 
 public class CellContext {
 
-  private Workbook workbook;
+  private CellStyleContext cellStyleContext;
   private CellStyle cellStyle;
   private Function<Cell, Boolean> condition;
+  private List<Consumer<Cell>> cellModifiers = new ArrayList<>();
 
-  public CellContext(Workbook workbook) {
-    this.workbook = workbook;
-    this.cellStyle = workbook.createCellStyle();
+  public CellContext(CellStyleContext cellStyleContext) {
+    this.cellStyleContext = cellStyleContext;
   }
 
   public void setCondition(
@@ -23,13 +26,21 @@ public class CellContext {
   }
 
   public void setCellStyle(BiConsumer<Workbook, CellStyle> cellStyleConsumer) {
-    cellStyleConsumer.accept(workbook, cellStyle);
+    cellStyle = cellStyleContext.createCellStyle();
+    cellStyleConsumer.accept(cellStyleContext.getWorkbook(), cellStyle);
+  }
+
+  public void addCellModifier(Consumer<Cell> cellModifier) {
+    cellModifiers.add(cellModifier);
   }
 
   public void applyCellStyleToCell(Cell cell) {
-    if (cell != null && cellStyle != null) {
+    if (cell != null) {
       if (condition == null || (condition != null && condition.apply(cell))) {
-        cell.setCellStyle(cellStyle);
+        if (cellStyle != null) {
+          cellStyleContext.addCellStyleToCell(cell, cellStyle);
+        }
+        cellModifiers.forEach(cellModifier -> cellModifier.accept(cell));
       }
     }
   }

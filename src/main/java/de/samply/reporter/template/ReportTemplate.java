@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import de.samply.reporter.template.script.ScriptReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,6 +26,10 @@ public class ReportTemplate {
   @JacksonXmlProperty(isAttribute = true, localName = "exporter")
   @JsonProperty("exporter")
   private Exporter exporter;
+
+  @JacksonXmlProperty(isAttribute = true, localName = "init-script")
+  @JsonProperty("init-script")
+  private ScriptReference initScript;
 
 
   public String getId() {
@@ -59,4 +64,13 @@ public class ReportTemplate {
   public void setExporter(Exporter exporter) {
     this.exporter = exporter;
   }
+
+  public ScriptReference getInitScript() {
+    return initScript;
+  }
+
+  public void setInitScript(ScriptReference initScript) {
+    this.initScript = initScript;
+  }
+
 }
