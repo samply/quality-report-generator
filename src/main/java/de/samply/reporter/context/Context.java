@@ -1,7 +1,9 @@
 package de.samply.reporter.context;
 
 import de.samply.reporter.script.CsvRecordIterator;
+import de.samply.reporter.template.ColumnTemplate;
 import de.samply.reporter.template.ReportTemplate;
+import de.samply.reporter.template.SheetTemplate;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -29,6 +31,8 @@ public class Context {
   private final CsvConfig csvConfig;
   private final Map<String, Function<String[], String>> functionMap = new HashMap<>();
   private final MultiMap multiMap = new MultiMap();
+
+  private final Map<String, Integer> sheetNameColumnNameIndex = new HashMap<>();
 
   public Context(Path resultsDirectory, ReportTemplate reportTemplate,
       Path[] sourcePaths, CsvConfig csvConfig) {
@@ -155,6 +159,33 @@ public class Context {
       }
     }
     return List.of(result);
+  }
+
+  public Integer getColumnIndex(String sheetName, String columnName) {
+    String key = sheetName + columnName;
+    Integer index = sheetNameColumnNameIndex.get(key);
+    if (index == null) {
+      SheetTemplate sheetTemplate = null;
+      for (SheetTemplate tempSheetTemplate : reportTemplate.getSheetTemplates()) {
+        if (tempSheetTemplate.getName().equalsIgnoreCase(sheetName)) {
+          sheetTemplate = tempSheetTemplate;
+          break;
+        }
+      }
+      if (sheetTemplate != null) {
+        int tempIndex = 0;
+        for (ColumnTemplate columnTemplate : sheetTemplate.getColumnTemplates()) {
+          if (columnTemplate.getName().equalsIgnoreCase(columnName)) {
+            index = tempIndex;
+            break;
+          } else {
+            tempIndex++;
+          }
+        }
+      }
+      sheetNameColumnNameIndex.put(key, index);
+    }
+    return index;
   }
 
 }

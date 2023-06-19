@@ -13,11 +13,14 @@
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
 %>
 <%
-    def printLine = { attribute, value, valueMatch, numberOfPatientsForAttribute, patientsWithAttributeValue ->
+    def printLine = { mdrId, dktkId, dataType, attribute, value, valueMatch, numberOfPatientsForAttribute, patientsWithAttributeValue ->
         def numberOfPatientsForAttributeValue = (patientsWithAttributeValue != null) ? patientsWithAttributeValue.size() : 0
         def lineElements = [
+                mdrId,
+                dktkId,
                 attribute,
                 value,
+                dataType,
                 (numberOfPatientsForAttributeValue > 0) ? valueMatch : emptyValue,
                 numberOfPatientsForAttributeValue,
                 (numberOfPatientsForAttribute != 0) ? (100.0 * numberOfPatientsForAttributeValue / numberOfPatientsForAttribute).round(1) : 0,
@@ -35,6 +38,9 @@ ${lineElements.join(DELIMITER)}
         def patientsForAttribute = ((Set) dataModel.getElement(patientsProAttributeKey, attribute))
         def numberOfPatientsForAttribute = (patientsForAttribute != null) ? patientsForAttribute.size() : 0
         def isToBeFiltered = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][1] : false
+        def mdrId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][4] : emptyValue
+        def dktkId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][7] : emptyValue
+        def dataType = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][6] : emptyValue
         def filteredPatients = [] as Set
         def filteredValue = null
         def isEmptyValueToBeIgnored = dataModel.getKeySet(patientsProAttributeValueKey, attribute).size() > 1
@@ -48,13 +54,13 @@ ${lineElements.join(DELIMITER)}
             if (filteredValue.trim().equals(emptyValue)){
                 filteredPatients = [] as Set
             }
-            printLine(attribute, filteredValue, match, numberOfPatientsForAttribute, filteredPatients)
+            printLine(mdrId, dktkId, dataType, attribute, filteredValue, match, numberOfPatientsForAttribute, filteredPatients)
         }
         dataModel.getKeySet(patientsProAttributeValueKey, attribute).forEach { value ->
             if ((!isToBeFiltered || dataModel.getElement(validationKey, attribute, value) != null) && (!value.equals(emptyValue) || !isEmptyValueToBeIgnored)) {
                 def patients = (value.trim().equals(emptyValue)) ? [] : dataModel.getElement(patientsProAttributeValueKey, attribute, value)
                 def valueMatch = (dataModel.getElement(validationKey, attribute, value) == null) ? match : mismatch
-                printLine(attribute, value, valueMatch, numberOfPatientsForAttribute, patients)
+                printLine(mdrId, dktkId, dataType, attribute, value, valueMatch, numberOfPatientsForAttribute, patients)
             }
         }
     }
