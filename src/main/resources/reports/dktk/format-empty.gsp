@@ -1,12 +1,16 @@
-<%@ page import="org.apache.poi.ss.usermodel.Font; de.samply.reporter.context.CellContext" %>
-<% CellContext dataModel = cellContext %>
+<%@ page import="de.samply.reporter.context.Context; org.apache.poi.ss.usermodel.Font; de.samply.reporter.context.CellContext" %>
 <%
-    dataModel.setCellStyle { workbook, cellStyle ->
+    CellContext cellDataModel = cellContext
+    Context dataModel = context
+%>
+<%
+    cellDataModel.setCellStyle { workbook, cellStyle ->
         def font = workbook.createFont()
         font.setColor(org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined.ROYAL_BLUE.getIndex())
         cellStyle.setFont(font)
     }
 %>
 <%
-    dataModel.setCondition { cell -> cell.getRow().getCell(2).getStringCellValue().trim().equals("") }
+    def index = dataModel.getColumnIndex("filtered elements", "FHIR value")
+    cellDataModel.setCondition { cell -> cell.getRow().getCell(index).getStringCellValue().trim().equals("") }
 %>
