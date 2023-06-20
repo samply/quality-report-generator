@@ -1,7 +1,9 @@
 package de.samply.reporter.context;
 
 import de.samply.reporter.script.CsvRecordIterator;
+import de.samply.reporter.template.ColumnTemplate;
 import de.samply.reporter.template.ReportTemplate;
+import de.samply.reporter.template.SheetTemplate;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,12 +25,14 @@ import org.slf4j.LoggerFactory;
 public class Context {
 
   private final Logger logger = LoggerFactory.getLogger(Context.class);
-  private Path resultsDirectory;
-  private ReportTemplate reportTemplate;
-  private Path[] sourcePaths;
-  private CsvConfig csvConfig;
-  private Map<String, Function<String[],String>> functionMap = new HashMap<>();
-  private MultiMap multiMap = new MultiMap();
+  private final Path resultsDirectory;
+  private final ReportTemplate reportTemplate;
+  private final Path[] sourcePaths;
+  private final CsvConfig csvConfig;
+  private final Map<String, Function<String[], String>> functionMap = new HashMap<>();
+  private final MultiMap multiMap = new MultiMap();
+
+  private final Map<String, Integer> sheetNameColumnNameIndex = new HashMap<>();
 
   public Context(Path resultsDirectory, ReportTemplate reportTemplate,
       Path[] sourcePaths, CsvConfig csvConfig) {
@@ -46,11 +50,11 @@ public class Context {
     return csvConfig;
   }
 
-  public void defineFunction(String functionName, Function<String[], String> function){
+  public void defineFunction(String functionName, Function<String[], String> function) {
     functionMap.put(functionName, function);
   }
 
-  public String executeFunction(String functionName, String... parameters){
+  public String executeFunction(String functionName, String... parameters) {
     Function<String[], String> function = functionMap.get(functionName);
     return (function != null) ? function.apply(parameters) : "";
   }
@@ -83,7 +87,7 @@ public class Context {
     return multiMap.getAll(keys);
   }
 
-  public Set<String> getKeySet(String... keys){
+  public Set<String> getKeySet(String... keys) {
     return multiMap.getKeySet(keys);
   }
 
@@ -129,8 +133,59 @@ public class Context {
         .setRecordSeparator(csvConfig.endOfLine())
         .build()
         .parse(bufferedReader)) {
-      csvParser.getRecords().forEach(record -> recordConsumer.accept(record));
+      csvParser.getRecords().forEach(recordConsumer);
     }
+  }
+
+  public boolean hasOnlyHeaders(Path path) throws IOException {
+    try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
+      int lineCount = 0;
+      while (reader.readLine() != null) {
+        lineCount++;
+        if (lineCount > 1) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  public List<String> fetchHeaders(Path path) throws IOException {
+    String[] result = {};
+    try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
+      String line = reader.readLine();
+      if (line != null && line.trim().length() > 0) {
+        result = line.split(csvConfig.delimiter());
+      }
+    }
+    return List.of(result);
+  }
+
+  public Integer getColumnIndex(String sheetName, String columnName) {
+    String key = sheetName + columnName;
+    Integer index = sheetNameColumnNameIndex.get(key);
+    if (index == null) {
+      SheetTemplate sheetTemplate = null;
+      for (SheetTemplate tempSheetTemplate : reportTemplate.getSheetTemplates()) {
+        if (tempSheetTemplate.getName().equalsIgnoreCase(sheetName)) {
+          sheetTemplate = tempSheetTemplate;
+          break;
+        }
+      }
+      if (sheetTemplate != null) {
+        int tempIndex = 0;
+        for (ColumnTemplate columnTemplate : sheetTemplate.getColumnTemplates()) {
+          if (columnTemplate.getName().equalsIgnoreCase(columnName)) {
+            index = tempIndex;
+            break;
+          } else {
+            tempIndex++;
+          }
+        }
+      }
+      sheetNameColumnNameIndex.put(key, index);
+    }
+    return index;
   }
 
 }

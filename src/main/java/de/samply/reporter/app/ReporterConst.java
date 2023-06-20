@@ -15,6 +15,7 @@ public class ReporterConst {
   public static final String INFO = "/info";
   public static final String GENERATE = "/generate";
   public static final String REPORT = "/report";
+  public static final String REPORT_STATUS = "/report-status";
   public static final String REPORTS_LIST = "/reports-list";
 
   // REST Parameters

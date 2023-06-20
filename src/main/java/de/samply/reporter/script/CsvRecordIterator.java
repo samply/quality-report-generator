@@ -13,10 +13,10 @@ import org.apache.commons.csv.CSVRecord;
 
 public class CsvRecordIterator implements Iterator<CSVRecord> {
 
-  private FileReader fileReader;
-  private BufferedReader bufferedReader;
-  private CSVParser csvParser;
-  private Iterator<CSVRecord> iterator;
+  private final FileReader fileReader;
+  private final BufferedReader bufferedReader;
+  private final CSVParser csvParser;
+  private final Iterator<CSVRecord> iterator;
 
   public CsvRecordIterator(Path sourcePath, CsvConfig csvConfig) throws ContextException {
     try {

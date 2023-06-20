@@ -34,12 +34,12 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 public class ReporterController {
 
   private final String projectVersion = ProjectVersion.getProjectVersion();
-  private ReportGenerator reportGenerator;
-  private ReportMetaInfoManager reportMetaInfoManager;
-  private ReportTemplateManager reportTemplateManager;
+  private final ReportGenerator reportGenerator;
+  private final ReportMetaInfoManager reportMetaInfoManager;
+  private final ReportTemplateManager reportTemplateManager;
   private final String httpRelativePath;
   private final String httpServletRequestScheme;
-  private ObjectMapper objectMapper = new ObjectMapper();
+  private final ObjectMapper objectMapper = new ObjectMapper();
 
 
   public ReporterController(
@@ -141,6 +141,20 @@ public class ReporterController {
   @GetMapping(value = ReporterConst.REPORTS_LIST)
   public ResponseEntity fetchAllReports() throws ReportMetaInfoManagerException {
     return ResponseEntity.ok().body(reportMetaInfoManager.fetchAllExistingReportMetaInfos());
+  }
+
+  @GetMapping(value = ReporterConst.REPORT_STATUS)
+  public ResponseEntity<ReportStatus> fetchReportStatus(
+      @RequestParam(name = ReporterConst.REPORT_ID) String reportId
+  ) throws ReportMetaInfoManagerException {
+    Optional<ReportMetaInfo> reportMetaInfo = reportMetaInfoManager.fetchReportMetaInfo(reportId);
+    if (reportMetaInfo.isEmpty()) {
+      return ResponseEntity.ok(ReportStatus.NOT_FOUND);
+    }
+    if (!reportMetaInfo.get().path().toFile().exists()) {
+      return ResponseEntity.ok(ReportStatus.RUNNING);
+    }
+    return ResponseEntity.ok(ReportStatus.OK);
   }
 
 

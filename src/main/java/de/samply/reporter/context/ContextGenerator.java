@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ContextGenerator {
 
-  private Path directory;
-  private CsvConfig defaultCsvConfig;
+  private final Path directory;
+  private final CsvConfig defaultCsvConfig;
 
   public ContextGenerator(
       @Value(ReporterConst.TEMP_FILES_DIRECTORY_SV) String directory,

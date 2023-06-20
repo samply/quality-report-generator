@@ -2,6 +2,7 @@ package de.samply.reporter.script;
 
 import de.samply.reporter.app.ReporterConst;
 import de.samply.reporter.context.CellContext;
+import de.samply.reporter.context.CellStyleContext;
 import de.samply.reporter.context.Context;
 import de.samply.reporter.template.script.Script;
 import de.samply.reporter.template.script.ScriptFramework;
@@ -11,11 +12,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import org.apache.poi.ss.usermodel.Workbook;
 
 public class GroovyTemplatesEngine extends ScriptEngineImpl {
 
-  private GStringTemplateEngine engine = new GStringTemplateEngine();
+  private final GStringTemplateEngine engine = new GStringTemplateEngine();
 
   @Override
   public ScriptFramework getScriptFramework() {
@@ -35,7 +35,7 @@ public class GroovyTemplatesEngine extends ScriptEngineImpl {
 
   private void generateResult(ScriptResult result, Script script, Binding binding)
       throws ScriptEngineException {
-    try (FileWriter fileWriter = new FileWriter(result.getRawResult().toFile())) {
+    try (FileWriter fileWriter = new FileWriter(result.rawResult().toFile())) {
       generateResult(script, binding, fileWriter);
     } catch (IOException e) {
       throw new ScriptEngineException(e);
@@ -52,9 +52,11 @@ public class GroovyTemplatesEngine extends ScriptEngineImpl {
   }
 
   @Override
-  public CellContext generateCellContext(Script script, Workbook workbook) throws ScriptEngineException {
-    CellContext result = new CellContext(workbook);
+  public CellContext generateCellContext(Script script, CellStyleContext cellStyleContext, Context context)
+      throws ScriptEngineException {
+    CellContext result = new CellContext(cellStyleContext);
     Binding binding = new Binding();
+    binding.setVariable(ReporterConst.CONTEXT_VARIABLE, context);
     binding.setVariable(ReporterConst.CELL_CONTEXT_VARIABLE, result);
     generateResult(script, binding, new StringWriter());
     return result;
