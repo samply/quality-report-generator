@@ -99,7 +99,7 @@ public class Context {
     return resultsDirectory;
   }
 
-  public ReportTemplate getQualityReportTemplate() {
+  public ReportTemplate getReportTemplate() {
     return reportTemplate;
   }
 

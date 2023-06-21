@@ -5,7 +5,7 @@
     def createMdrLink = urn -> 'https://mdr.ccp-it.dktk.dkfz.de/detail.xhtml?urn=' + ((String) urn).replace(":", "%3A")
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
     cellDataModel.addCellModifier { cell ->
-        def index = dataModel.getColumnIndex("filtered elements", "FHIR attribute")
+        def index = dataModel.getColumnIndex("filtered elements", "data element FHIR")
         def metaInfo = attributeMetaInfo[cell.getRow().getCell(index).getStringCellValue()]
         if (metaInfo != null){
             def url = metaInfo[4]
