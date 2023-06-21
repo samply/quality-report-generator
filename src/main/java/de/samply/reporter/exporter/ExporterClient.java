@@ -42,6 +42,7 @@ public class ExporterClient {
   private final String tempFilesDirectory;
   private final int maxNumberOfAttemptsToGetExport;
   private final int timeInSecondsToWaitBetweenAttemptsToGetExport;
+  private final int webClientBufferSizeInBytes;
 
   public ExporterClient(@Value(ReporterConst.EXPORTER_URL_SV) String exporterUrl,
       @Value(ReporterConst.EXPORTER_API_KEY_SV) String exporterApiKey,
@@ -51,7 +52,8 @@ public class ExporterClient {
       @Value(ReporterConst.EXPORTER_OUTPUT_FORMAT_SV) String exporterOutputFormat,
       @Value(ReporterConst.TEMP_FILES_DIRECTORY_SV) String tempFilesDirectory,
       @Value(ReporterConst.MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT_SV) Integer maxNumberOfAttemptsToGetExport,
-      @Value(ReporterConst.TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV) Integer timeInSecondsToWaitBetweenAttemptsToGetExport) {
+      @Value(ReporterConst.TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV) Integer timeInSecondsToWaitBetweenAttemptsToGetExport,
+      @Value(ReporterConst.WEBCLIENT_BUFFER_SIZE_IN_BYTES_SV) Integer webClientBufferSizeInBytes) {
     this.webClient = WebClient.builder().baseUrl(exporterUrl).build();
     this.exporterApiKey = exporterApiKey;
     this.exporterQuery = exporterQuery;
@@ -61,29 +63,35 @@ public class ExporterClient {
     this.tempFilesDirectory = tempFilesDirectory;
     this.maxNumberOfAttemptsToGetExport = maxNumberOfAttemptsToGetExport;
     this.timeInSecondsToWaitBetweenAttemptsToGetExport = timeInSecondsToWaitBetweenAttemptsToGetExport;
+    this.webClientBufferSizeInBytes = webClientBufferSizeInBytes;
   }
 
   public void fetchExportFiles(Consumer<String> exportFilePathConsumer,
       ReportTemplate template)
       throws ExporterClientException {
-    logger.info("Sending request to exporter...");
-    Exporter exporter = fetchExporter(template);
-    RequestBodySpec requestBodySpec = webClient.post().uri(
-        uriBuilder -> uriBuilder.path(ReporterConst.EXPORTER_REQUEST)
-            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
-            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT,
-                exporter.getQueryFormat())
-            .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
-                Optional.of(exporter.getTemplateId()))
-            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
-                exporter.getOutputFormat())
-            .build()).header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey);
-    if (exporter.getTemplate() != null && exporter.getTemplate().trim().length() > 0) {
-      requestBodySpec.contentType(MediaType.APPLICATION_XML);
-      requestBodySpec.bodyValue(exporter.getTemplate());
+    RequestResponseEntity requestResponseEntity = null;
+    if (template.getExporter() == null || template.getExporter().getExportUrl() == null) {
+      logger.info("Sending request to exporter...");
+      Exporter exporter = fetchExporter(template);
+      RequestBodySpec requestBodySpec = webClient.post().uri(
+          uriBuilder -> uriBuilder.path(ReporterConst.EXPORTER_REQUEST)
+              .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
+              .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT,
+                  exporter.getQueryFormat())
+              .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
+                  Optional.of(exporter.getTemplateId()))
+              .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
+                  exporter.getOutputFormat())
+              .build()).header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey);
+      if (exporter.getTemplate() != null && exporter.getTemplate().trim().length() > 0) {
+        requestBodySpec.contentType(MediaType.APPLICATION_XML);
+        requestBodySpec.bodyValue(exporter.getTemplate());
+      }
+      requestResponseEntity = requestBodySpec.retrieve()
+          .bodyToMono(RequestResponseEntity.class).block();
+    } else {
+      requestResponseEntity = new RequestResponseEntity(template.getExporter().getExportUrl());
     }
-    RequestResponseEntity requestResponseEntity = requestBodySpec.retrieve()
-        .bodyToMono(RequestResponseEntity.class).block();
     fetchExportFiles(requestResponseEntity, exportFilePathConsumer);
   }
 
@@ -129,7 +137,9 @@ public class ExporterClient {
       AtomicReference<String> filePath) {
     logger.info("Fetching export... (Attempt: " + (
         maxNumberOfAttemptsToGetExport - counter.get() + 1) + ")");
-    return WebClient.builder().baseUrl(exportFilesUrl).build().get()
+    return WebClient.builder()
+        .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(webClientBufferSizeInBytes))
+        .baseUrl(exportFilesUrl).build().get()
         .exchangeToMono(clientResponse -> {
           if (clientResponse.statusCode().is2xxSuccessful()) {
             if (!HttpStatus.OK.equals(clientResponse.statusCode())) {

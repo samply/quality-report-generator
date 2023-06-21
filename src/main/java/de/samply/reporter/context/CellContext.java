@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 public class CellContext {
@@ -15,6 +16,7 @@ public class CellContext {
   private CellStyle cellStyle;
   private Function<Cell, Boolean> condition;
   private final List<Consumer<Cell>> cellModifiers = new ArrayList<>();
+  private final List<Consumer<Sheet>> sheetModifiers = new ArrayList<>();
 
   public CellContext(CellStyleContext cellStyleContext) {
     this.cellStyleContext = cellStyleContext;
@@ -34,6 +36,10 @@ public class CellContext {
     cellModifiers.add(cellModifier);
   }
 
+  public void addSheetModifier(Consumer<Sheet> sheetModifier) {
+    sheetModifiers.add(sheetModifier);
+  }
+
   public void applyCellStyleToCell(Cell cell) {
     if (cell != null) {
       if (condition == null || (condition.apply(cell))) {
@@ -42,6 +48,12 @@ public class CellContext {
         }
         cellModifiers.forEach(cellModifier -> cellModifier.accept(cell));
       }
+    }
+  }
+
+  public void applySheetStyleToSheet(Sheet sheet){
+    if (sheet != null){
+      sheetModifiers.forEach(sheetModifier -> sheetModifier.accept(sheet));
     }
   }
 

@@ -7,14 +7,17 @@
     def DELIMITER = dataModel.getCsvConfig().delimiter()
     def yes = "ja"
     def no = "nein"
+    def emptyValue = ""
 
     def totalNumberOfPatients = dataModel.getElement("total number of patients")
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
 %>
 <%
-    dataModel.getKeySet(patientsProAttributeKey).forEach { attribute ->
+    dataModel.getKeySet(patientsProAttributeKey).findAll(attribute -> !attribute.equalsIgnoreCase("validation")).forEach { attribute ->
         def patientsForAttribute = ((Set) dataModel.getElement(patientsProAttributeKey, attribute))
         def numberOfPatientsForAttribute = (patientsForAttribute != null) ? patientsForAttribute.size() : 0
+        def mdrId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][4] : emptyValue
+        def dktkId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][7] : emptyValue
         def patientsWithMatch = [] as Set
         def patientsWithMismatch = [] as Set
         dataModel.getKeySet(patientsProAttributeValueKey, attribute).forEach { value ->
@@ -28,6 +31,8 @@
         def numberOfPatientsForAttributeWithMatch = (patientsWithMatch != null) ? patientsWithMatch.size() : 0
         def numberOfPatientsForAttributeWithMismatch = (patientsWithMismatch != null) ? patientsWithMismatch.size() : 0
         def lineElements = [
+                mdrId,
+                dktkId,
                 attribute,
                 numberOfPatientsForAttribute,
                 (totalNumberOfPatients != 0) ? (100.0 * numberOfPatientsForAttribute / totalNumberOfPatients).round(1) : 0,

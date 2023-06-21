@@ -7,6 +7,7 @@
     def DELIMITER = dataModel.getCsvConfig().delimiter()
     def match = "match"
     def mismatch = "mismatch"
+    def notFound = "not found"
     def emptyValue = ""
 
     def totalNumberOfPatients = dataModel.getElement("total number of patients")
@@ -21,7 +22,7 @@
                 attribute,
                 value,
                 dataType,
-                (numberOfPatientsForAttributeValue > 0) ? valueMatch : emptyValue,
+                (numberOfPatientsForAttributeValue > 0) ? valueMatch : notFound,
                 numberOfPatientsForAttributeValue,
                 (numberOfPatientsForAttribute != 0) ? (100.0 * numberOfPatientsForAttributeValue / numberOfPatientsForAttribute).round(1) : 0,
                 (totalNumberOfPatients != 0) ? (100.0 * numberOfPatientsForAttributeValue / totalNumberOfPatients).round(1) : 0
