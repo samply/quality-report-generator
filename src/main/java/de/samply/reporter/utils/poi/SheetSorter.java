@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Row;
@@ -25,18 +26,23 @@ public class SheetSorter {
 
   private void sortSheet(Sheet sheet, int column, SortOrder order) {
     List<Row> rows = new ArrayList<>();
-    sheet.forEach(row -> rows.add(row));
+    sheet.forEach(row -> {
+      if (row.getRowNum() != 0) {
+        rows.add(row);
+      }
+    });
     Comparator<Row> comparator = Comparator.comparing(
         row -> row.getCell(column).getStringCellValue());
     Collections.sort(rows, (order == SortOrder.ASCENDING) ? comparator : comparator.reversed());
-    rows.forEach(row -> cloneRowInSheet(sheet, row));
+    AtomicInteger counter = new AtomicInteger(1);
+    rows.forEach(row -> cloneRowInSheet(sheet, row, counter));
     rows.forEach(sheet::removeRow);
   }
 
-  private void cloneRowInSheet(Sheet sheet, Row row) {
-    Row newRow = sheet.createRow(sheet.getLastRowNum() + 1);
+  private void cloneRowInSheet(Sheet sheet, Row row, AtomicInteger counter) {
+    Row newRow = sheet.createRow(counter.getAndIncrement());
     row.forEach(cell -> {
-      Cell newCell = newRow.createCell(row.getRowNum());
+      Cell newCell = newRow.createCell(cell.getColumnIndex());
       newCell.setCellValue(cell.getStringCellValue());
       CellStyle cellStyle = cell.getCellStyle();
       newCell.setCellStyle(cellStyle);
