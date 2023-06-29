@@ -1,5 +1,7 @@
 package de.samply.reporter.context;
 
+import de.samply.reporter.utils.multilevel.MultiLevelComparable;
+import de.samply.reporter.utils.multilevel.MultilevelComparableFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
