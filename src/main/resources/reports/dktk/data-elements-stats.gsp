@@ -47,7 +47,7 @@
                 (numberOfPatientsForAttribute != 0 && 100.0 * numberOfPatientsForAttributeWithMismatch / numberOfPatientsForAttribute < 10) ? yes : no,
                 (numberOfPatientsForAttribute > 0 && 100.0 * numberOfPatientsForAttributeWithMismatch / numberOfPatientsForAttribute < 10) ? yes : no
         ]
-        if (lineElements[0] != null && lineElements[0].trim().size() > 0) {
+        if (lineElements[2] != null && lineElements[2].trim().size() > 0) {
 %>
 ${lineElements.join(DELIMITER)}
 <% }
