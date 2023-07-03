@@ -12,7 +12,7 @@
     def totalNumberOfPatients = dataModel.getElement("total number of patients")
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
 %>
-<% dataModel.getKeySet(patientsProAttributeKey).forEach { attribute ->
+<% dataModel.getKeySet(patientsProAttributeKey).findAll {attribute -> !attribute.toLowerCase().endsWith('-validation') && !attribute.toLowerCase().endsWith('-id')}.forEach { attribute ->
     def patientsForAttribute = ((Set) dataModel.getElement(patientsProAttributeKey, attribute))
     def numberOfPatientsForAttribute = (patientsForAttribute != null) ? patientsForAttribute.size() : 0
     def isEmptyValueToBeIgnored = dataModel.getKeySet(patientsProAttributeValueKey, attribute).size() > 1

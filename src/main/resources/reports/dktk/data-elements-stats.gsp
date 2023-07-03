@@ -13,7 +13,7 @@
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
 %>
 <%
-    dataModel.getKeySet(patientsProAttributeKey).findAll(attribute -> !attribute.equalsIgnoreCase("validation")).forEach { attribute ->
+    dataModel.getKeySet(patientsProAttributeKey).findAll {attribute -> !attribute.toLowerCase().endsWith('-validation') && !attribute.toLowerCase().endsWith('-id')}.forEach { attribute ->
         def patientsForAttribute = ((Set) dataModel.getElement(patientsProAttributeKey, attribute))
         def numberOfPatientsForAttribute = (patientsForAttribute != null) ? patientsForAttribute.size() : 0
         def mdrId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][4] : emptyValue
