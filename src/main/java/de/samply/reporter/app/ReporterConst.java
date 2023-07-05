@@ -54,7 +54,7 @@ public class ReporterConst {
   public final static String REPORTS_META_INFO_FILENAME = "REPORTS_META_INFO_FILENAME";
   public final static String HTTP_RELATIVE_PATH = "HTTP_RELATIVE_PATH";
   public final static String HTTP_SERVLET_REQUEST_SCHEME = "HTTP_SERVLET_REQUEST_SCHEME";
-
+  public final static String WEBCLIENT_BUFFER_SIZE_IN_BYTES = "WEBCLIENT_BUFFER_SIZE_IN_BYTES";
 
 
   // Spring Values (SV)
@@ -80,7 +80,7 @@ public class ReporterConst {
   public final static String REPORTS_DIRECTORY_SV =
       HEAD_SV + REPORTS_DIRECTORY + ":./reports" + BOTTOM_SV;
   public final static String MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT_SV =
-      HEAD_SV + MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT + ":600" + BOTTOM_SV;
+      HEAD_SV + MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT + ":4320" + BOTTOM_SV;
   public final static String TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV =
       HEAD_SV + TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT + ":20" + BOTTOM_SV;
   public final static String EXCEL_WORKBOOK_WINDOW_SV =
@@ -103,8 +103,8 @@ public class ReporterConst {
       HEAD_SV + HTTP_RELATIVE_PATH + ":" + BOTTOM_SV;
   public final static String HTTP_SERVLET_REQUEST_SCHEME_SV =
       HEAD_SV + HTTP_SERVLET_REQUEST_SCHEME + ":http" + BOTTOM_SV;
-
-
+  public final static String WEBCLIENT_BUFFER_SIZE_IN_BYTES_SV =
+      HEAD_SV + WEBCLIENT_BUFFER_SIZE_IN_BYTES + ":#{10 * 1024 * 1024}" + BOTTOM_SV;
 
 
   // Other variables:

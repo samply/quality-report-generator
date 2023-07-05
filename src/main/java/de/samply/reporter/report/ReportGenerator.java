@@ -237,10 +237,13 @@ public class ReportGenerator {
   }
 
   private void autoSizeSheet(Sheet sheet) {
-    Row headerRow = sheet.getRow(0);
-    if (headerRow != null) {
-      for (int j = 0; j <= headerRow.getLastCellNum(); j++) {
-        sheet.autoSizeColumn(j);
+    int lastRowNum = sheet.getLastRowNum();
+    if (lastRowNum >= 0){
+      Row headerRow = sheet.getRow(0);
+      if (headerRow != null) {
+        for (int j = 0; j <= headerRow.getLastCellNum(); j++) {
+          sheet.autoSizeColumn(j);
+        }
       }
     }
   }
@@ -248,13 +251,14 @@ public class ReportGenerator {
   private void addAutoFilter(Sheet sheet) {
     int rowStartIndex = 0;
     int rowEndIndex = sheet.getLastRowNum();
+    if (rowEndIndex >= 0){
+      int columnStartIndex = 0;
+      int columnEndIndex = sheet.getRow(0).getLastCellNum() - 1;
 
-    int columnStartIndex = 0;
-    int columnEndIndex = sheet.getRow(0).getLastCellNum() - 1;
-
-    CellRangeAddress cra = new CellRangeAddress(rowStartIndex, rowEndIndex, columnStartIndex,
-        columnEndIndex);
-    sheet.setAutoFilter(cra);
+      CellRangeAddress cra = new CellRangeAddress(rowStartIndex, rowEndIndex, columnStartIndex,
+          columnEndIndex);
+      sheet.setAutoFilter(cra);
+    }
   }
 
   private void addFormatToWorkbook(Workbook workbook, ReportTemplate template, Context context) {
@@ -318,6 +322,8 @@ public class ReportGenerator {
       CellStyleContext cellStyleContext, Context context, Script script) {
     CellContext cellContext = fetchCellContext(script, cellStyleContext, context);
     Sheet sheet = workbook.getSheet(sheetTemplate.getName());
+    logger.info("Adding format to sheet '"+ sheetTemplate.getName() + "'...");
+    cellContext.applySheetStyleToSheet(sheet);
     PercentageLogger percentageLogger = new PercentageLogger(logger, sheet.getLastRowNum(),
         "Adding format to all cells of sheet '" + sheetTemplate.getName() + "'...");
     sheet.forEach(row -> {

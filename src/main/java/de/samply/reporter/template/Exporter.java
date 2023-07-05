@@ -6,6 +6,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlText;
 
 public class Exporter {
 
+  @JacksonXmlProperty(isAttribute = true, localName = "export-url")
+  @JsonProperty(value = "export-url")
+
+  private String exportUrl;
+
   @JacksonXmlProperty(isAttribute = true, localName = "query")
   @JsonProperty(value = "query")
 
@@ -68,6 +73,14 @@ public class Exporter {
 
   public void setTemplate(String template) {
     this.template = template;
+  }
+
+  public String getExportUrl() {
+    return exportUrl;
+  }
+
+  public void setExportUrl(String exportUrl) {
+    this.exportUrl = exportUrl;
   }
 
 }

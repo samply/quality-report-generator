@@ -7,7 +7,9 @@
     def DELIMITER = dataModel.getCsvConfig().delimiter()
     def match = "match"
     def mismatch = "mismatch"
+    def notFound = "not found"
     def emptyValue = ""
+    def filteredDataTypes = ['Integer', 'Float', 'String', 'Date', 'Datetime', 'Time']
 
     def totalNumberOfPatients = dataModel.getElement("total number of patients")
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
@@ -21,12 +23,12 @@
                 attribute,
                 value,
                 dataType,
-                (numberOfPatientsForAttributeValue > 0) ? valueMatch : emptyValue,
+                (numberOfPatientsForAttributeValue > 0) ? valueMatch : notFound,
                 numberOfPatientsForAttributeValue,
                 (numberOfPatientsForAttribute != 0) ? (100.0 * numberOfPatientsForAttributeValue / numberOfPatientsForAttribute).round(1) : 0,
                 (totalNumberOfPatients != 0) ? (100.0 * numberOfPatientsForAttributeValue / totalNumberOfPatients).round(1) : 0
         ]
-        if (lineElements[0] != null && lineElements[0].trim().size() > 0) {
+        if (lineElements[2] != null && lineElements[2].trim().size() > 0) {
 %>
 ${lineElements.join(DELIMITER)}
 <%
@@ -34,10 +36,10 @@ ${lineElements.join(DELIMITER)}
     }
 %>
 <%
-    dataModel.getKeySet(patientsProAttributeKey).forEach { attribute ->
+    dataModel.getKeySet(patientsProAttributeKey).findAll {attribute -> !attribute.toLowerCase().endsWith('-validation') && !attribute.toLowerCase().endsWith('-id')}.forEach { attribute ->
         def patientsForAttribute = ((Set) dataModel.getElement(patientsProAttributeKey, attribute))
         def numberOfPatientsForAttribute = (patientsForAttribute != null) ? patientsForAttribute.size() : 0
-        def isToBeFiltered = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][1] : false
+        def isToBeFiltered = (attributeMetaInfo[attribute] != null && attributeMetaInfo[attribute][6] != null && filteredDataTypes.contains(attributeMetaInfo[attribute][6]))
         def mdrId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][4] : emptyValue
         def dktkId = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][7] : emptyValue
         def dataType = (attributeMetaInfo[attribute] != null) ? attributeMetaInfo[attribute][6] : emptyValue
