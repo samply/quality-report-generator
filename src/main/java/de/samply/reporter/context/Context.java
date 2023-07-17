@@ -1,5 +1,7 @@
 package de.samply.reporter.context;
 
+import de.samply.reporter.logger.BufferedLoggerFactory;
+import de.samply.reporter.logger.Logger;
 import de.samply.reporter.script.CsvRecordIterator;
 import de.samply.reporter.template.ColumnTemplate;
 import de.samply.reporter.template.ReportTemplate;
@@ -19,12 +21,10 @@ import java.util.function.Function;
 import org.apache.commons.csv.CSVFormat.Builder;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Context {
 
-  private final Logger logger = LoggerFactory.getLogger(Context.class);
+  private final Logger logger = BufferedLoggerFactory.getLogger(Context.class);
   private final Path resultsDirectory;
   private final ReportTemplate reportTemplate;
   private final Path[] sourcePaths;

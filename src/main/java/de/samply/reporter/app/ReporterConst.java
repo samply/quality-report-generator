@@ -17,10 +17,13 @@ public class ReporterConst {
   public static final String REPORT = "/report";
   public static final String REPORT_STATUS = "/report-status";
   public static final String REPORTS_LIST = "/reports-list";
+  public static final String LOGS = "/logs";
 
   // REST Parameters
-  public static final String REPORT_TEMPLATE_ID = "templateId";
-  public static final String REPORT_ID = "reportId";
+  public static final String REPORT_TEMPLATE_ID = "template-id";
+  public static final String REPORT_ID = "report-id";
+  public static final String LOGS_SIZE = "logs-size";
+  public static final String LOGS_LAST_LINE = "logs-last-line";
 
 
   // Exporter Variables
@@ -124,5 +127,6 @@ public class ReporterConst {
   public final static String CONTEXT_VARIABLE = "context";
   public final static String CELL_CONTEXT_VARIABLE = "cellContext";
   public final static String EMPTY_EXCEL_CELL = "";
+  public final static int BUFFERED_LOGGER_SIZE = 1000;
 
 }

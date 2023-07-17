@@ -1,6 +1,7 @@
 package de.samply.reporter.utils;
 
-import org.slf4j.Logger;
+
+import de.samply.reporter.logger.Logger;
 
 public class PercentageLogger {
 

@@ -23,6 +23,7 @@
 		<thymeleaf.version>3.1.1.RELEASE</thymeleaf.version>
 		<commons-csv.version>1.10.0</commons-csv.version>
 		<groovy-templates.version>4.0.12</groovy-templates.version>
+		<guava.version>32.1.1-jre</guava.version>
 	</properties>
 
 	<dependencies>
@@ -111,6 +112,11 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 			<version>${commons-csv.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>${guava.version}</version>
 		</dependency>
 	</dependencies>
 
