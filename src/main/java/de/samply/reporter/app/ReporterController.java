@@ -2,7 +2,9 @@ package de.samply.reporter.app;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.samply.reporter.exporter.ExporterClient;
 import de.samply.reporter.logger.BufferedLoggerFactory;
+import de.samply.reporter.logger.Logs;
 import de.samply.reporter.report.ReportGenerator;
 import de.samply.reporter.report.ReportGeneratorException;
 import de.samply.reporter.report.metainfo.ReportMetaInfo;
@@ -34,6 +36,7 @@ public class ReporterController {
     private final ReportGenerator reportGenerator;
     private final ReportMetaInfoManager reportMetaInfoManager;
     private final ReportTemplateManager reportTemplateManager;
+    private final ExporterClient exporterClient;
     private final String httpRelativePath;
     private final String httpServletRequestScheme;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -44,12 +47,14 @@ public class ReporterController {
             @Value(ReporterConst.HTTP_SERVLET_REQUEST_SCHEME_SV) String httpServletRequestScheme,
             ReportGenerator reportGenerator,
             ReportTemplateManager reportTemplateManager,
-            ReportMetaInfoManager reportMetaInfoManager) {
+            ReportMetaInfoManager reportMetaInfoManager,
+            ExporterClient exporterClient) {
         this.httpRelativePath = httpRelativePath;
         this.httpServletRequestScheme = httpServletRequestScheme;
         this.reportGenerator = reportGenerator;
         this.reportTemplateManager = reportTemplateManager;
         this.reportMetaInfoManager = reportMetaInfoManager;
+        this.exporterClient = exporterClient;
     }
 
     //@CrossOrigin(origins = "${CROSS_ORIGINS}", allowedHeaders = {"Authorization"})
@@ -155,10 +160,14 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.LOGS)
-    public ResponseEntity<String[]> fetchLogs(
+    public ResponseEntity<Logs[]> fetchLogs(
             @RequestParam(name = ReporterConst.LOGS_SIZE) int logsSize,
-            @RequestParam(name = ReporterConst.LOGS_LAST_LINE, required = false) String logsLastLine) {
-        return ResponseEntity.ok().body(BufferedLoggerFactory.getLastLoggerLines(logsSize, logsLastLine));
+            @RequestParam(name = ReporterConst.LOGS_LAST_LINE, required = false) String logsLastLine,
+            @RequestParam(name = ReporterConst.LOGS_LAST_LINE_EXPORTER, required = false) String exporterLogsLastLine) {
+        Logs reporterLogs = new Logs(ReporterConst.REPORTER, BufferedLoggerFactory.getLastLoggerLines(logsSize, logsLastLine));
+        Logs exporterLogs = new Logs(ReporterConst.EXPORTER, exporterClient.fetchLogs(logsSize, exporterLogsLastLine));
+        Logs[] logs = new Logs[]{reporterLogs, exporterLogs};
+        return ResponseEntity.ok().body(logs);
     }
 
 

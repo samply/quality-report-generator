@@ -24,10 +24,14 @@ public class ReporterConst {
   public static final String REPORT_ID = "report-id";
   public static final String LOGS_SIZE = "logs-size";
   public static final String LOGS_LAST_LINE = "logs-last-line";
+  public static final String LOGS_LAST_LINE_EXPORTER = "logs-last-line-exporter";
 
 
   // Exporter Variables
   public final static String EXPORTER_REQUEST = "/request";
+  public final static String EXPORTER_LOGS = "/logs";
+  public static final String EXPORTER_LOGS_SIZE = "logs-size";
+  public static final String EXPORTER_LOGS_LAST_LINE = "logs-last-line";
   public final static String EXPORTER_REQUEST_PARAM_QUERY = "query";
   public final static String EXPORTER_REQUEST_PARAM_QUERY_FORMAT = "query-format";
   public final static String EXPORTER_REQUEST_PARAM_TEMPLATE_ID = "template-id";
@@ -128,5 +132,7 @@ public class ReporterConst {
   public final static String CELL_CONTEXT_VARIABLE = "cellContext";
   public final static String EMPTY_EXCEL_CELL = "";
   public final static int BUFFERED_LOGGER_SIZE = 1000;
+  public final static String EXPORTER = "exporter";
+  public final static String REPORTER = "reporter";
 
 }
