@@ -1,6 +1,8 @@
 package de.samply.reporter.exporter;
 
 import de.samply.reporter.app.ReporterConst;
+import de.samply.reporter.logger.BufferedLoggerFactory;
+import de.samply.reporter.logger.Logger;
 import de.samply.reporter.template.Exporter;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.utils.FileUtils;
@@ -18,8 +20,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,7 +32,7 @@ import reactor.core.publisher.Mono;
 @Component
 public class ExporterClient {
 
-  private final static Logger logger = LoggerFactory.getLogger(ExporterClient.class);
+  private final static Logger logger = BufferedLoggerFactory.getLogger(ExporterClient.class);
   private final WebClient webClient;
   private final String exporterApiKey;
   private final String exporterQuery;
