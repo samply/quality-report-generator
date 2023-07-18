@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Multilevel comparable
 - Request logs
 - Exporter logs
+- Export URL in Request
 
 
 ### Changed

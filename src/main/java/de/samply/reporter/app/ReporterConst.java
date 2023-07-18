@@ -21,6 +21,7 @@ public class ReporterConst {
 
   // REST Parameters
   public static final String REPORT_TEMPLATE_ID = "template-id";
+  public static final String EXPORT_URL = "export-url";
   public static final String REPORT_ID = "report-id";
   public static final String LOGS_SIZE = "logs-size";
   public static final String LOGS_LAST_LINE = "logs-last-line";

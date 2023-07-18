@@ -5,72 +5,85 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import de.samply.reporter.template.script.ScriptReference;
+import de.samply.reporter.utils.CloneUtils;
+import de.samply.reporter.utils.CloneUtilsException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
 @JacksonXmlRootElement(localName = "report")
 public class ReportTemplate {
 
-  @JacksonXmlProperty(isAttribute = true, localName = "id")
-  @JsonProperty(value = "id")
-  private String id;
+    @JacksonXmlProperty(isAttribute = true, localName = "id")
+    @JsonProperty(value = "id")
+    private String id;
 
-  @JacksonXmlProperty(isAttribute = true, localName = "filename")
-  @JsonProperty(value = "filename")
-  private String filename;
+    @JacksonXmlProperty(isAttribute = true, localName = "filename")
+    @JsonProperty(value = "filename")
+    private String filename;
 
-  @JacksonXmlElementWrapper(useWrapping = false)
-  @JsonProperty("sheet")
-  private List<SheetTemplate> sheetTemplates = new ArrayList<>();
+    @JacksonXmlElementWrapper(useWrapping = false)
+    @JsonProperty("sheet")
+    private List<SheetTemplate> sheetTemplates = new ArrayList<>();
 
-  @JacksonXmlProperty(isAttribute = true, localName = "exporter")
-  @JsonProperty("exporter")
-  private Exporter exporter;
+    @JacksonXmlProperty(isAttribute = true, localName = "exporter")
+    @JsonProperty("exporter")
+    private Exporter exporter;
 
-  @JacksonXmlProperty(isAttribute = true, localName = "init-script")
-  @JsonProperty("init-script")
-  private ScriptReference initScript;
+    @JacksonXmlProperty(isAttribute = true, localName = "init-script")
+    @JsonProperty("init-script")
+    private ScriptReference initScript;
 
 
-  public String getId() {
-    return id;
-  }
+    public String getId() {
+        return id;
+    }
 
-  public void setId(String id) {
-    this.id = id;
-  }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-  public String getFilename() {
-    return filename;
-  }
+    public String getFilename() {
+        return filename;
+    }
 
-  public void setFilename(String filename) {
-    this.filename = filename;
-  }
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
 
-  public List<SheetTemplate> getSheetTemplates() {
-    return sheetTemplates;
-  }
+    public List<SheetTemplate> getSheetTemplates() {
+        return sheetTemplates;
+    }
 
-  public void setSheetTemplates(
-      List<SheetTemplate> sheetTemplates) {
-    this.sheetTemplates = sheetTemplates;
-  }
+    public void setSheetTemplates(
+            List<SheetTemplate> sheetTemplates) {
+        this.sheetTemplates = sheetTemplates;
+    }
 
-  public Exporter getExporter() {
-    return exporter;
-  }
+    public Exporter getExporter() {
+        return exporter;
+    }
 
-  public void setExporter(Exporter exporter) {
-    this.exporter = exporter;
-  }
+    public void setExporter(Exporter exporter) {
+        this.exporter = exporter;
+    }
 
-  public ScriptReference getInitScript() {
-    return initScript;
-  }
+    public ScriptReference getInitScript() {
+        return initScript;
+    }
 
-  public void setInitScript(ScriptReference initScript) {
-    this.initScript = initScript;
-  }
+    public void setInitScript(ScriptReference initScript) {
+        this.initScript = initScript;
+    }
+
+    @Override
+    public ReportTemplate clone() throws CloneNotSupportedException {
+        try {
+            return CloneUtils.clone(this);
+        } catch (CloneUtilsException e) {
+            throw new CloneNotSupportedException(ExceptionUtils.getStackTrace(e));
+        }
+    }
 
 }
