@@ -38,6 +38,7 @@ public class ReporterConst {
     public final static String EXPORTER_REQUEST_PARAM_TEMPLATE_ID = "template-id";
     public final static String EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT = "output-format";
     public final static String HTTP_HEADER_API_KEY = "x-api-key";
+    public final static String IS_INTERNAL_REQUEST = "internal-request";
 
 
     // Environment Variables
@@ -68,6 +69,7 @@ public class ReporterConst {
     public final static String WEBCLIENT_TCP_KEEP_IDLE_IN_SECONDS = "WEBCLIENT_TCP_KEEP_IDLE_IN_SECONDS";
     public final static String WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS = "WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS";
     public final static String WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES = "WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES";
+    public final static String IS_EXPORTER_IN_SAME_SERVER = "IS_EXPORTER_IN_SAME_SERVER";
 
 
     // Spring Values (SV)
@@ -128,6 +130,9 @@ public class ReporterConst {
             HEAD_SV + WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS + ":60" + BOTTOM_SV;
     public final static String WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES_SV =
             HEAD_SV + WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES + ":10" + BOTTOM_SV;
+    public final static String IS_EXPORTER_IN_SAME_SERVER_SV =
+            HEAD_SV + IS_EXPORTER_IN_SAME_SERVER + ":true" + BOTTOM_SV;
+
 
     // Other variables:
     public static final String HTTP_HEADER_CONTENT_DISPOSITION = "Content-Disposition";
