@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.samply.reporter.exporter.ExporterClient;
 import de.samply.reporter.logger.BufferedLoggerFactory;
+import de.samply.reporter.logger.Logger;
 import de.samply.reporter.logger.Logs;
 import de.samply.reporter.report.ReportGenerator;
 import de.samply.reporter.report.ReportGeneratorException;
@@ -27,12 +28,15 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Optional;
 
 @RestController
 public class ReporterController {
 
+    private final Logger logger = BufferedLoggerFactory.getLogger(ReporterController.class);
     private final String projectVersion = ProjectVersion.getProjectVersion();
     private final ReportGenerator reportGenerator;
     private final ReportMetaInfoManager reportMetaInfoManager;
@@ -117,15 +121,43 @@ public class ReporterController {
     }
 
     private String fetchResponseUrl(HttpServletRequest httpServletRequest, String reportId) {
-        return ServletUriComponentsBuilder.fromRequestUri(httpServletRequest)
-                .scheme(httpServletRequestScheme)
-                .replacePath(createHttpPath(ReporterConst.REPORT))
+        ServletUriComponentsBuilder servletUriComponentsBuilder = ServletUriComponentsBuilder.fromRequestUri(
+                httpServletRequest);
+        if (isInternalRequest(httpServletRequest)) {
+            servletUriComponentsBuilder
+                    .scheme("http")
+                    .replacePath(ReporterConst.REPORT);
+        } else {
+            servletUriComponentsBuilder
+                    .scheme(httpServletRequestScheme)
+                    .replacePath(createHttpPath(ReporterConst.REPORT));
+        }
+        String result = servletUriComponentsBuilder
                 .queryParam(ReporterConst.REPORT_ID, reportId).toUriString();
+        logger.info("Response URL: " + result);
+        return result;
     }
 
     private String createHttpPath(String httpPath) {
         return (httpRelativePath != null && httpRelativePath.length() > 0) ? httpRelativePath + '/'
                 + httpPath : httpPath;
+    }
+
+    private boolean isInternalRequest(HttpServletRequest httpServletRequest) {
+        try {
+            return isInternalRequestWithoutExceptionHandling(httpServletRequest);
+        } catch (UnknownHostException e) {
+            logger.error(ExceptionUtils.getStackTrace(e));
+            return false;
+        }
+    }
+
+    private boolean isInternalRequestWithoutExceptionHandling(HttpServletRequest httpServletRequest)
+            throws UnknownHostException {
+        String remoteAddr = httpServletRequest.getRemoteAddr();
+        String hostAddress = InetAddress.getLocalHost().getHostAddress();
+        return remoteAddr.equals("localhost") || remoteAddr.equals("127.0.0.1") || remoteAddr.equals("0:0:0:0:0:0:0:1")
+                || remoteAddr.substring(0, remoteAddr.lastIndexOf(".")).equals(hostAddress.substring(0, hostAddress.lastIndexOf(".")));
     }
 
     @GetMapping(value = ReporterConst.REPORT, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
