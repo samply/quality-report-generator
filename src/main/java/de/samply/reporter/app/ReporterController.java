@@ -10,6 +10,7 @@ import de.samply.reporter.report.ReportGeneratorException;
 import de.samply.reporter.report.metainfo.ReportMetaInfo;
 import de.samply.reporter.report.metainfo.ReportMetaInfoManager;
 import de.samply.reporter.report.metainfo.ReportMetaInfoManagerException;
+import de.samply.reporter.template.Exporter;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.template.ReportTemplateManager;
 import de.samply.reporter.utils.ProjectVersion;
@@ -67,6 +68,7 @@ public class ReporterController {
     public ResponseEntity<String> generate(
             HttpServletRequest httpServletRequest,
             @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID, required = false) String templateId,
+            @RequestParam(name = ReporterConst.EXPORT_URL, required = false) String exportUrl,
             @RequestHeader(name = "Content-Type", required = false) String contentType,
             @RequestBody(required = false) String template
     ) throws ReportGeneratorException, ReportMetaInfoManagerException, JsonProcessingException {
@@ -80,14 +82,26 @@ public class ReporterController {
             try {
                 reportTemplate = reportTemplateManager.fetchTemplate(template);
             } catch (IOException e) {
-                return new ResponseEntity<>(ExceptionUtils.getStackTrace(e),
-                        HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(ExceptionUtils.getStackTrace(e), HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } else {
             if (templateId == null) {
                 return new ResponseEntity<>("No template nor template id provided", HttpStatus.BAD_REQUEST);
             }
             reportTemplate = reportTemplateManager.getQualityReportTemplate(templateId);
+            if (exportUrl != null) {
+                try {
+                    reportTemplate = reportTemplate.clone();
+                } catch (CloneNotSupportedException e) {
+                    return new ResponseEntity<>(ExceptionUtils.getStackTrace(e), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+                Exporter exporter = reportTemplate.getExporter();
+                if (exporter == null) {
+                    exporter = new Exporter();
+                    reportTemplate.setExporter(exporter);
+                }
+                exporter.setExportUrl(exportUrl);
+            }
         }
         ReportMetaInfo reportMetaInfo = reportMetaInfoManager.createNewReportMetaInfo(
                 reportTemplate);
