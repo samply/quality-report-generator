@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Request logs
 - Exporter logs
 - Export URL in Request
+- HTTP Request and Connection Timeout
 
 
 ### Changed
