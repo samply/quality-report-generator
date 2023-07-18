@@ -6,15 +6,18 @@ import de.samply.reporter.logger.Logger;
 import de.samply.reporter.template.Exporter;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.utils.FileUtils;
+import io.netty.channel.ChannelOption;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -23,6 +26,7 @@ import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -54,8 +58,16 @@ public class ExporterClient {
                           @Value(ReporterConst.TEMP_FILES_DIRECTORY_SV) String tempFilesDirectory,
                           @Value(ReporterConst.MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT_SV) Integer maxNumberOfAttemptsToGetExport,
                           @Value(ReporterConst.TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV) Integer timeInSecondsToWaitBetweenAttemptsToGetExport,
-                          @Value(ReporterConst.WEBCLIENT_BUFFER_SIZE_IN_BYTES_SV) Integer webClientBufferSizeInBytes) {
-        this.webClient = WebClient.builder().baseUrl(exporterUrl).build();
+                          @Value(ReporterConst.WEBCLIENT_BUFFER_SIZE_IN_BYTES_SV) Integer webClientBufferSizeInBytes,
+                          @Value(ReporterConst.WEBCLIENT_REQUEST_TIMEOUT_IN_SECONDS_SV) Integer webClientRequestTimeoutInSeconds,
+                          @Value(ReporterConst.WEBCLIENT_CONNECTION_TIMEOUT_IN_SECONDS_SV) Integer webClientConnectionTimeoutInSeconds) {
+        this.webClient = WebClient.builder()
+                .clientConnector(new ReactorClientHttpConnector(
+                        HttpClient.create()
+                                .responseTimeout(Duration.ofSeconds(webClientRequestTimeoutInSeconds))
+                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, webClientConnectionTimeoutInSeconds * 1000)
+                ))
+                .baseUrl(exporterUrl).build();
         this.exporterApiKey = exporterApiKey;
         this.exporterQuery = exporterQuery;
         this.exporterQueryFormat = exporterQueryFormat;
