@@ -44,3 +44,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Intellij Warnings
+- Retries of webclient managed by webclient retrywhen avoiding stackoverflow by recursive function
