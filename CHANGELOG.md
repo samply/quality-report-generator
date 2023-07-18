@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Logs for report generation
 - Multilevel comparable
 - Request logs
+- Exporter logs
+- Export URL in Request
 
 
 ### Changed
