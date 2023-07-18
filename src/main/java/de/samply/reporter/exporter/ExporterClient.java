@@ -8,17 +8,19 @@ import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.utils.FileUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.epoll.EpollChannelOption;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.util.retry.Retry;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileOutputStream;
@@ -150,42 +152,41 @@ public class ExporterClient {
     }
 
     private Mono<byte[]> fetchExportFiles(String exportFilesUrl, AtomicReference<String> filePath) {
-        return fetchExportFiles(exportFilesUrl, new AtomicInteger(maxNumberOfAttemptsToGetExport),
-                filePath);
-    }
-
-    private Mono<byte[]> fetchExportFiles(String exportFilesUrl, AtomicInteger counter,
-                                          AtomicReference<String> filePath) {
-        logger.info("Fetching export... (Attempt: " + (
-                maxNumberOfAttemptsToGetExport - counter.get() + 1) + ")");
+        /*logger.info("Fetching export... (Attempt: " + (
+                maxNumberOfAttemptsToGetExport - counter.get() + 1) + ")");*/
+        AtomicInteger counter = new AtomicInteger(1);
         return WebClient.builder()
                 .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(webClientBufferSizeInBytes))
                 .baseUrl(exportFilesUrl).build().get()
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().is2xxSuccessful()) {
-                        if (!HttpStatus.OK.equals(clientResponse.statusCode())) {
-                            waitUntilNextAttempt();
-                            return (counter.decrementAndGet() >= 0) ? fetchExportFiles(exportFilesUrl, counter,
-                                    filePath) : Mono.error(new ExporterClientException(
-                                    "Export file not ready after max number of attempts"));
-                        } else {
+                        if (HttpStatus.OK.equals(clientResponse.statusCode())) {
                             logger.info("Export available. Downloading...");
                             filePath.set(fetchFilePath(fetchFilename(clientResponse)));
                             return clientResponse.bodyToMono(byte[].class);
+                        } else {
+                            return (counter.get() >= maxNumberOfAttemptsToGetExport) ?
+                                    Mono.error(new ExporterClientException("Export file not ready after max number of attempts")) :
+                                    Mono.error(new WebClientResponseException(clientResponse.statusCode(), null, clientResponse.headers().asHttpHeaders(), null, null, null));
                         }
                     } else {
-                        return Mono.error(new ExporterClientException(
-                                "Error getting export files: " + clientResponse.statusCode()));
+                        return Mono.error(new ExporterClientException("Error getting export files: " + clientResponse.statusCode()));
                     }
-                });
+                })
+                .retryWhen(
+                        Retry.fixedDelay(maxNumberOfAttemptsToGetExport, Duration.ofSeconds(timeInSecondsToWaitBetweenAttemptsToGetExport))
+                                .filter(throwable -> shouldRetry(throwable, counter)));
     }
 
-    private void waitUntilNextAttempt() {
-        try {
-            Thread.sleep(timeInSecondsToWaitBetweenAttemptsToGetExport * 1000L);
-        } catch (InterruptedException e) {
-            logger.error(ExceptionUtils.getStackTrace(e));
+    private boolean shouldRetry(Throwable throwable, AtomicInteger counter) {
+        if (throwable instanceof WebClientResponseException) {
+            logger.info("Fetching export... (Attempt: " + counter.getAndIncrement() + ")");
+            WebClientResponseException responseException = (WebClientResponseException) throwable;
+            HttpStatusCode statusCode = responseException.getStatusCode();
+            // Retry if the status code is not 200 (indicating an error)
+            return statusCode != HttpStatus.OK;
         }
+        return false; // Do not retry for other types of exceptions
     }
 
     private String fetchFilename(ClientResponse clientResponse) {
