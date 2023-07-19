@@ -8,6 +8,9 @@
     def attributeMetaInfoKey = "Attribute Meta Info"
     def totalNumberOfPatientsKey = "total number of patients"
     def emptyValue = ""
+    def existsValidationKey = "Exists Validation for Attribute"
+    def validationSuffix = "-validation"
+    def idSuffix = "-id"
 %>
 <!-- Attribute Meta Info - Elements:
 Index: Attribute
@@ -101,6 +104,8 @@ Index: Attribute
     dataModel.putElement(attributeMetaInfo, attributeMetaInfoKey)
 %>
 <%
+    def existingValidationAttributes = [] as Set
+    def getOriginalAttributeOfValidationAttribute = { attribute -> attribute.substring(0, attribute.length() - validationSuffix.length()) }
     def patientIdDktkLokalIdMap = [:]
     dataModel.getSourcePaths().forEach(path -> {
         if (dataModel.hasOnlyHeaders(path)) {
@@ -109,6 +114,12 @@ Index: Attribute
                 if (attribute != null && attribute.trim().size() > 0) {
                     dataModel.putElement(patients, patientsProAttributeValueKey, attribute, emptyValue)
                     dataModel.putElement(patients, patientsProAttributeKey, attribute, emptyValue)
+                    if (attribute.toLowerCase().endsWith(validationSuffix)) {
+                        attribute = getOriginalAttributeOfValidationAttribute(attribute)
+                        if (!existingValidationAttributes.contains(attribute)) {
+                            existingValidationAttributes.add(attribute)
+                        }
+                    }
                 }
             }
         } else {
@@ -123,8 +134,8 @@ Index: Attribute
                 csvRecord.getParser().getHeaderMap().keySet().forEach(header -> {
                     def value = csvRecord.get(header)
 
-                    if (!header.toLowerCase().endsWith("-id")) {
-                        if (!header.toLowerCase().endsWith("-validation")) {
+                    if (!header.toLowerCase().endsWith(idSuffix)) {
+                        if (!header.toLowerCase().endsWith(validationSuffix)) {
                             if (value == null || value.trim().size() == 0) {
                                 value = emptyValue
                             }
@@ -143,24 +154,23 @@ Index: Attribute
                             dataModel.putElement(patients, patientsProAttributeKey, header)
 
                         } else {
-
+                            def originalAttribute = getOriginalAttributeOfValidationAttribute(header)
+                            if (!existingValidationAttributes.contains(originalAttribute)) {
+                                existingValidationAttributes.add(originalAttribute)
+                            }
                             if (value != null && value.trim().length() > 0) {
-                                def valueHeader = null
-                                for (String tempHeader : csvRecord.getParser().getHeaderMap().keySet()) {
-                                    if (header.contains(tempHeader) && header.length() > tempHeader.length()) {
-                                        valueHeader = tempHeader
-                                        break
+                                if (originalAttribute != null) {
+                                    def attributeValue = csvRecord.get(originalAttribute)
+                                    if (attributeValue != null) {
+                                        def error = dataModel.getElement(validationKey, originalAttribute, attributeValue)
+
+                                        if (error == null) {
+                                            def patientIdSet = [] as Set
+                                            error = [value, patientIdSet]
+                                            dataModel.putElement(error, validationKey, originalAttribute, attributeValue)
+                                        }
+                                        ((Set) error[1]).add(patientId)
                                     }
-                                }
-                                if (valueHeader != null) {
-                                    def attributeValue = csvRecord.get(valueHeader)
-                                    def error = dataModel.getElement(validationKey, valueHeader, attributeValue)
-                                    if (error == null) {
-                                        def patientIdSet = [] as Set
-                                        error = [value, patientIdSet]
-                                        dataModel.putElement(error, validationKey, valueHeader, attributeValue)
-                                    }
-                                    ((Set) error[1]).add(patientId)
                                 }
                             }
                         }
@@ -171,6 +181,7 @@ Index: Attribute
         }
     })
     dataModel.putElement(patientIdDktkLokalIdMap, patientIdDktkLokalIdMapKey)
+    dataModel.putElement(existingValidationAttributes, existsValidationKey)
 %>
 <%
     def patientIds = [] as Set
