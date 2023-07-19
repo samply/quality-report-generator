@@ -42,7 +42,8 @@ public class ReporterConst {
 
 
     // Environment Variables
-    //public final static String CROSS_ORIGINS = "CROSS_ORIGINS";
+    public final static String CROSS_ORIGINS = "CROSS_ORIGINS";
+    public final static String CORS_MAX_AGE_IN_SECONDS = "CORS_MAX_AGE_IN_SECONDS";
     public final static String EXPORTER_URL = "EXPORTER_URL";
     public final static String EXPORTER_API_KEY = "EXPORTER_API_KEY";
     public final static String EXPORTER_QUERY = "EXPORTER_QUERY";
@@ -76,8 +77,10 @@ public class ReporterConst {
     public final static String HEAD_SV = "${";
     public final static String BOTTOM_SV = "}";
     public final static String DEFAULT_NULL_VALUE = ":#{null}";
-    //    public final static String CROSS_ORIGINS_SV =
-//            "#{'" + HEAD_SV + CROSS_ORIGINS + ":#{null}" + BOTTOM_SV + "'.split(',')}";
+    public final static String CROSS_ORIGINS_SV =
+            "#{'" + HEAD_SV + CROSS_ORIGINS + ":#{null}" + BOTTOM_SV + "'.split(',')}";
+    public final static String CORS_MAX_AGE_IN_SECONDS_SV =
+            HEAD_SV + CORS_MAX_AGE_IN_SECONDS + ":360" + BOTTOM_SV;
     public final static String EXPORTER_URL_SV =
             HEAD_SV + EXPORTER_URL + BOTTOM_SV;
     public final static String EXPORTER_API_KEY_SV =
