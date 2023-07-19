@@ -4,10 +4,12 @@
     def patientsProAttributeValueKey = "Patients pro attribute-value"
     def patientsProAttributeKey = "Patients pro attribute"
     def validationKey = "Validation"
+    def existsValidationKey = "Exists Validation for Attribute"
     def DELIMITER = dataModel.getCsvConfig().delimiter()
     def match = "match"
     def mismatch = "mismatch"
     def notFound = "not found"
+    def notValidated = "not validated"
     def emptyValue = ""
     def filteredDataTypes = ['Integer', 'Float', 'String', 'Date', 'Datetime', 'Time']
 
@@ -36,7 +38,7 @@ ${lineElements.join(DELIMITER)}
     }
 %>
 <%
-    dataModel.getKeySet(patientsProAttributeKey).findAll {attribute -> !attribute.toLowerCase().endsWith('-validation') && !attribute.toLowerCase().endsWith('-id')}.forEach { attribute ->
+    dataModel.getKeySet(patientsProAttributeKey).findAll { attribute -> !attribute.toLowerCase().endsWith('-validation') && !attribute.toLowerCase().endsWith('-id') }.forEach { attribute ->
         def patientsForAttribute = ((Set) dataModel.getElement(patientsProAttributeKey, attribute))
         def numberOfPatientsForAttribute = (patientsForAttribute != null) ? patientsForAttribute.size() : 0
         def isToBeFiltered = (attributeMetaInfo[attribute] != null && attributeMetaInfo[attribute][6] != null && filteredDataTypes.contains(attributeMetaInfo[attribute][6]))
@@ -53,7 +55,7 @@ ${lineElements.join(DELIMITER)}
             }
         }
         if (filteredValue != null && (!filteredValue.equals(emptyValue) || !isEmptyValueToBeIgnored)) {
-            if (filteredValue.trim().equals(emptyValue)){
+            if (filteredValue.trim().equals(emptyValue)) {
                 filteredPatients = [] as Set
             }
             printLine(mdrId, dktkId, dataType, attribute, filteredValue, match, numberOfPatientsForAttribute, filteredPatients)
@@ -61,7 +63,8 @@ ${lineElements.join(DELIMITER)}
         dataModel.getKeySet(patientsProAttributeValueKey, attribute).forEach { value ->
             if ((!isToBeFiltered || dataModel.getElement(validationKey, attribute, value) != null) && (!value.equals(emptyValue) || !isEmptyValueToBeIgnored)) {
                 def patients = (value.trim().equals(emptyValue)) ? [] : dataModel.getElement(patientsProAttributeValueKey, attribute, value)
-                def valueMatch = (dataModel.getElement(validationKey, attribute, value) == null) ? match : mismatch
+                def valueMatch = (dataModel.getElement(validationKey, attribute, value) == null) ?
+                        ((dataModel.getElement(existsValidationKey).contains(attribute)) ? match : notValidated) : mismatch
                 printLine(mdrId, dktkId, dataType, attribute, value, valueMatch, numberOfPatientsForAttribute, patients)
             }
         }
