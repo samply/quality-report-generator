@@ -51,6 +51,7 @@ public class ExporterClient {
     private final int maxNumberOfAttemptsToGetExport;
     private final int timeInSecondsToWaitBetweenAttemptsToGetExport;
     private final int webClientBufferSizeInBytes;
+    private final Boolean isExporterInSameServer;
 
     public ExporterClient(@Value(ReporterConst.EXPORTER_URL_SV) String exporterUrl,
                           @Value(ReporterConst.EXPORTER_API_KEY_SV) String exporterApiKey,
@@ -66,7 +67,9 @@ public class ExporterClient {
                           @Value(ReporterConst.WEBCLIENT_CONNECTION_TIMEOUT_IN_SECONDS_SV) Integer webClientConnectionTimeoutInSeconds,
                           @Value(ReporterConst.WEBCLIENT_TCP_KEEP_IDLE_IN_SECONDS_SV) Integer webClientTcpKeepIdleInSeconds,
                           @Value(ReporterConst.WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS_SV) Integer webClientTcpKeepIntervalInSeconds,
-                          @Value(ReporterConst.WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES_SV) Integer webClientTcpKeepConnetionNumberOfTries) {
+                          @Value(ReporterConst.WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES_SV) Integer webClientTcpKeepConnetionNumberOfTries,
+                          @Value(ReporterConst.IS_EXPORTER_IN_SAME_SERVER_SV) Boolean isExporterInSameServer) {
+        this.isExporterInSameServer = isExporterInSameServer;
         this.webClient = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(
                         HttpClient.create()
@@ -97,15 +100,17 @@ public class ExporterClient {
             logger.info("Sending request to exporter...");
             Exporter exporter = fetchExporter(template);
             RequestBodySpec requestBodySpec = webClient.post().uri(
-                    uriBuilder -> uriBuilder.path(ReporterConst.EXPORTER_REQUEST)
-                            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
-                            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT,
-                                    exporter.getQueryFormat())
-                            .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
-                                    Optional.of(exporter.getTemplateId()))
-                            .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
-                                    exporter.getOutputFormat())
-                            .build()).header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey);
+                            uriBuilder -> uriBuilder.path(ReporterConst.EXPORTER_REQUEST)
+                                    .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY, exporter.getQuery())
+                                    .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT,
+                                            exporter.getQueryFormat())
+                                    .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
+                                            Optional.of(exporter.getTemplateId()))
+                                    .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
+                                            exporter.getOutputFormat())
+                                    .build())
+                    .header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey)
+                    .header(ReporterConst.IS_INTERNAL_REQUEST, isExporterInSameServer.toString());
             if (exporter.getTemplate() != null && exporter.getTemplate().trim().length() > 0) {
                 requestBodySpec.contentType(MediaType.APPLICATION_XML);
                 requestBodySpec.bodyValue(exporter.getTemplate());

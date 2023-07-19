@@ -28,8 +28,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.util.Optional;
 
@@ -74,6 +72,7 @@ public class ReporterController {
             @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID, required = false) String templateId,
             @RequestParam(name = ReporterConst.EXPORT_URL, required = false) String exportUrl,
             @RequestHeader(name = "Content-Type", required = false) String contentType,
+            @RequestHeader(name = ReporterConst.IS_INTERNAL_REQUEST, required = false) Boolean isInternalRequest,
             @RequestBody(required = false) String template
     ) throws ReportGeneratorException, ReportMetaInfoManagerException, JsonProcessingException {
         ReportTemplate reportTemplate;
@@ -111,19 +110,19 @@ public class ReporterController {
                 reportTemplate);
         reportGenerator.generate(reportTemplate, reportMetaInfo);
         return new ResponseEntity<>(
-                createRequestResponseEntity(httpServletRequest, reportMetaInfo.id()), HttpStatus.OK);
+                createRequestResponseEntity(httpServletRequest, reportMetaInfo.id(), isInternalRequest), HttpStatus.OK);
     }
 
-    private String createRequestResponseEntity(HttpServletRequest request, String reportId)
+    private String createRequestResponseEntity(HttpServletRequest request, String reportId, Boolean isInternalRequest)
             throws JsonProcessingException {
         return objectMapper.writeValueAsString(
-                new GenerateResponseEntity(fetchResponseUrl(request, reportId)));
+                new GenerateResponseEntity(fetchResponseUrl(request, reportId, isInternalRequest)));
     }
 
-    private String fetchResponseUrl(HttpServletRequest httpServletRequest, String reportId) {
+    private String fetchResponseUrl(HttpServletRequest httpServletRequest, String reportId, Boolean isInternalRequest) {
         ServletUriComponentsBuilder servletUriComponentsBuilder = ServletUriComponentsBuilder.fromRequestUri(
                 httpServletRequest);
-        if (isInternalRequest(httpServletRequest)) {
+        if (isInternalRequest != null && isInternalRequest) {
             servletUriComponentsBuilder
                     .scheme("http")
                     .replacePath(ReporterConst.REPORT);
@@ -141,23 +140,6 @@ public class ReporterController {
     private String createHttpPath(String httpPath) {
         return (httpRelativePath != null && httpRelativePath.length() > 0) ? httpRelativePath + '/'
                 + httpPath : httpPath;
-    }
-
-    private boolean isInternalRequest(HttpServletRequest httpServletRequest) {
-        try {
-            return isInternalRequestWithoutExceptionHandling(httpServletRequest);
-        } catch (UnknownHostException e) {
-            logger.error(ExceptionUtils.getStackTrace(e));
-            return false;
-        }
-    }
-
-    private boolean isInternalRequestWithoutExceptionHandling(HttpServletRequest httpServletRequest)
-            throws UnknownHostException {
-        String remoteAddr = httpServletRequest.getRemoteAddr();
-        String hostAddress = InetAddress.getLocalHost().getHostAddress();
-        return remoteAddr.equals("localhost") || remoteAddr.equals("127.0.0.1") || remoteAddr.equals("0:0:0:0:0:0:0:1")
-                || remoteAddr.substring(0, remoteAddr.lastIndexOf(".")).equals(hostAddress.substring(0, hostAddress.lastIndexOf(".")));
     }
 
     @GetMapping(value = ReporterConst.REPORT, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
