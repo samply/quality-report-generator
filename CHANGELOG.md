@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - HTTP Request and Connection Timeout
 - HTTP TCP configuration
 - Not validated
+- CORS support
 
 
 ### Changed
