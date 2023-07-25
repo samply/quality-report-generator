@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Project name: quality-report-generator to reporter
+- Bugfix: Exporter Template
 
 ### Fixed
 - Intellij Warnings

@@ -105,7 +105,7 @@ public class ExporterClient {
                                     .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_FORMAT,
                                             exporter.getQueryFormat())
                                     .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_TEMPLATE_ID,
-                                            Optional.of(exporter.getTemplateId()))
+                                            Optional.ofNullable(exporter.getTemplateId()))
                                     .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
                                             exporter.getOutputFormat())
                                     .build())
@@ -128,7 +128,9 @@ public class ExporterClient {
         exporter.setQuery(fetchExporterValue(template, Exporter::getQuery, exporterQuery));
         exporter.setQueryFormat(
                 fetchExporterValue(template, Exporter::getQueryFormat, exporterQueryFormat));
-        if (exporter.getTemplate() == null) {
+        if (template != null && template.getExporter() != null && template.getExporter().getTemplate() != null) {
+            exporter.setTemplate(fetchExporterValue(template, Exporter::getTemplate, null));
+        } else {
             exporter.setTemplateId(
                     fetchExporterValue(template, Exporter::getTemplateId, exporterTemplateId));
         }
