@@ -1,0 +1,17 @@
+<!-- lang="thymeleaf" -->
+<th:block th:each="path : ${context.getSourcePaths()}">
+  <th:block th:each="csvRecord : ${context.fetchCsvRecords(path)}">
+    <th:block th:with="patientId = ${csvRecord.get('Patient-ID')}">
+      <th:block th:each="header : ${csvRecord.getParser().getHeaderMap().keySet()}">
+        <th:block th:with="value = ${csvRecord.get(header)}">
+          <th:block th:if="${!header.toLowerCase().contains('Validation')}">
+
+          </th:block>
+          <th:block th:else>
+
+          </th:block>
+        </th:block>
+      </th:block>
+    </th:block>
+  </th:block>
+</th:block>
