@@ -4,4 +4,4 @@ COPY target/reporter.jar /app/
 
 WORKDIR /app
 
-CMD ["java", "-jar", "reporter.jar"]
+CMD ["java", "$JAVA_OPTS", "-jar", "reporter.jar"]

@@ -122,7 +122,7 @@ public class ReporterConst {
     public final static String HTTP_SERVLET_REQUEST_SCHEME_SV =
             HEAD_SV + HTTP_SERVLET_REQUEST_SCHEME + ":http" + BOTTOM_SV;
     public final static String WEBCLIENT_BUFFER_SIZE_IN_BYTES_SV =
-            HEAD_SV + WEBCLIENT_BUFFER_SIZE_IN_BYTES + ":#{10 * 1024 * 1024}" + BOTTOM_SV;
+            HEAD_SV + WEBCLIENT_BUFFER_SIZE_IN_BYTES + ":#{36 * 1024 * 1024}" + BOTTOM_SV;
     public final static String WEBCLIENT_REQUEST_TIMEOUT_IN_SECONDS_SV =
             HEAD_SV + WEBCLIENT_REQUEST_TIMEOUT_IN_SECONDS + ":180" + BOTTOM_SV;
     public final static String WEBCLIENT_CONNECTION_TIMEOUT_IN_SECONDS_SV =
