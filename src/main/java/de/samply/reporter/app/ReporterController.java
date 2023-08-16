@@ -169,8 +169,13 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.REPORTS_LIST)
-    public ResponseEntity fetchAllReports() throws ReportMetaInfoManagerException {
-        return ResponseEntity.ok().body(reportMetaInfoManager.fetchAllExistingReportMetaInfos());
+    public ResponseEntity fetchAllReports(
+            @RequestParam(name = ReporterConst.REPORTS_LIST_PAGE, required = false) Integer page,
+            @RequestParam(name = ReporterConst.REPORTS_LIST_PAGE_SIZE, required = false) Integer pageSize
+    ) throws ReportMetaInfoManagerException {
+        return ResponseEntity.ok().body((page != null && pageSize != null) ?
+                reportMetaInfoManager.fetchAllExistingReportMetaInfos(pageSize, page) :
+                reportMetaInfoManager.fetchAllExistingReportMetaInfos());
     }
 
     @GetMapping(value = ReporterConst.REPORT_STATUS)
@@ -190,12 +195,17 @@ public class ReporterController {
     @GetMapping(value = ReporterConst.LOGS)
     public ResponseEntity<Logs[]> fetchLogs(
             @RequestParam(name = ReporterConst.LOGS_SIZE) int logsSize,
-            @RequestParam(name = ReporterConst.LOGS_LAST_LINE, required = false) String logsLastLine,
+            @RequestParam(name = ReporterConst.LOGS_LAST_LINE_REPORTER, required = false) String logsLastLine,
             @RequestParam(name = ReporterConst.LOGS_LAST_LINE_EXPORTER, required = false) String exporterLogsLastLine) {
         Logs reporterLogs = new Logs(ReporterConst.REPORTER, BufferedLoggerFactory.getLastLoggerLines(logsSize, logsLastLine));
         Logs exporterLogs = new Logs(ReporterConst.EXPORTER, exporterClient.fetchLogs(logsSize, exporterLogsLastLine));
         Logs[] logs = new Logs[]{reporterLogs, exporterLogs};
         return ResponseEntity.ok().body(logs);
+    }
+
+    @GetMapping(value = ReporterConst.TEMPLATE_IDS)
+    public ResponseEntity<String[]> fetchTemplateIds() {
+        return ResponseEntity.ok().body(reportTemplateManager.getReportTemplateIds());
     }
 
 
