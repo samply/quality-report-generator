@@ -41,6 +41,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - CORS support
 - Report Meta Info Paging
 - Get all Template IDs
+- Download report template
 
 
 ### Changed

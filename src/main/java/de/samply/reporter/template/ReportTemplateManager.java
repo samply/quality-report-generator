@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.nio.file.Files.*;
@@ -18,6 +19,7 @@ import static java.nio.file.Files.*;
 public class ReportTemplateManager {
 
     private final Map<String, ReportTemplate> idQualityReportTemplateMap = new HashMap<>();
+    private final Map<String, Path> idQualityReportTemplatePathMap = new HashMap<>();
 
     public ReportTemplateManager(
             @Value(ReporterConst.REPORT_TEMPLATE_DIRECTORY_SV) String qualityReportTemplateDirectory
@@ -54,6 +56,7 @@ public class ReportTemplateManager {
     private void loadTemplateWithoutExceptionHandling(Path templatePath) throws IOException {
         ReportTemplate reportTemplate = fetchTemplate(templatePath);
         idQualityReportTemplateMap.put(reportTemplate.getId(), reportTemplate);
+        idQualityReportTemplatePathMap.put(reportTemplate.getId(), templatePath);
     }
 
     public ReportTemplate fetchTemplate(Path templatePath) throws IOException {
@@ -71,6 +74,10 @@ public class ReportTemplateManager {
 
     public String[] getReportTemplateIds() {
         return idQualityReportTemplateMap.keySet().toArray(new String[0]);
+    }
+
+    public Optional<Path> getReportTemplatePath(String reportTemplateId) {
+        return Optional.ofNullable(idQualityReportTemplatePathMap.get(reportTemplateId));
     }
 
 }

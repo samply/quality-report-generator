@@ -203,9 +203,20 @@ public class ReporterController {
         return ResponseEntity.ok().body(logs);
     }
 
-    @GetMapping(value = ReporterConst.TEMPLATE_IDS)
+    @GetMapping(value = ReporterConst.REPORT_TEMPLATE_IDS)
     public ResponseEntity<String[]> fetchTemplateIds() {
         return ResponseEntity.ok().body(reportTemplateManager.getReportTemplateIds());
+    }
+
+    @GetMapping(value = ReporterConst.REPORT_TEMPLATE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    public ResponseEntity<InputStreamResource> fetchReporTemplate(
+            @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID) String reportTemplateId
+    ) throws FileNotFoundException {
+        Optional<Path> reportTemplatePath = reportTemplateManager.getReportTemplatePath(reportTemplateId);
+        if (reportTemplatePath.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return createResponseEntity(reportTemplatePath.get());
     }
 
 
