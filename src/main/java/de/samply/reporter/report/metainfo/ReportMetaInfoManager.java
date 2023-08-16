@@ -87,13 +87,14 @@ public class ReportMetaInfoManager {
 
     /**
      * @param pageSize page size.
-     * @param page     number of page beginning with 0.
+     * @param page     number of page beginning with 1.
      * @return list of report meta info.
      * @throws ReportMetaInfoManagerException
      */
     public ReportMetaInfo[] fetchAllExistingReportMetaInfos(int pageSize, int page) throws ReportMetaInfoManagerException {
         ReportMetaInfo[] reportMetaInfos = fetchAllExistingReportMetaInfos();
         List<ReportMetaInfo> result = new ArrayList<>();
+        page = page - 1;
         for (int i = page * pageSize; i < page * pageSize + pageSize && i < reportMetaInfos.length; i++) {
             result.add(reportMetaInfos[i]);
         }
