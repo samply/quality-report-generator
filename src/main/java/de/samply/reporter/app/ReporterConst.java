@@ -15,10 +15,11 @@ public class ReporterConst {
     public static final String INFO = "/info";
     public static final String GENERATE = "/generate";
     public static final String REPORT = "/report";
+    public static final String REPORT_TEMPLATE = "/report-template";
     public static final String REPORT_STATUS = "/report-status";
     public static final String REPORTS_LIST = "/reports-list";
     public static final String LOGS = "/logs";
-    public static final String TEMPLATE_IDS = "/template-ids";
+    public static final String REPORT_TEMPLATE_IDS = "/report-template-ids";
 
     // REST Parameters
     public static final String REPORT_TEMPLATE_ID = "template-id";
