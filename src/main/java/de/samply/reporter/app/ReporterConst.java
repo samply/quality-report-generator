@@ -18,14 +18,18 @@ public class ReporterConst {
     public static final String REPORT_STATUS = "/report-status";
     public static final String REPORTS_LIST = "/reports-list";
     public static final String LOGS = "/logs";
+    public static final String TEMPLATE_IDS = "/template-ids";
 
     // REST Parameters
     public static final String REPORT_TEMPLATE_ID = "template-id";
     public static final String EXPORT_URL = "export-url";
     public static final String REPORT_ID = "report-id";
     public static final String LOGS_SIZE = "logs-size";
-    public static final String LOGS_LAST_LINE = "logs-last-line";
+    public static final String LOGS_LAST_LINE_REPORTER = "logs-last-line-reporter";
     public static final String LOGS_LAST_LINE_EXPORTER = "logs-last-line-exporter";
+    public static final String REPORTS_LIST_PAGE_SIZE = "page-size";
+    public static final String REPORTS_LIST_PAGE = "page";
+
 
 
     // Exporter Variables
