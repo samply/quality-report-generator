@@ -106,8 +106,7 @@ public class ReporterController {
                 exporter.setExportUrl(exportUrl);
             }
         }
-        ReportMetaInfo reportMetaInfo = reportMetaInfoManager.createNewReportMetaInfo(
-                reportTemplate);
+        ReportMetaInfo reportMetaInfo = reportMetaInfoManager.createNewReportMetaInfo(reportTemplate);
         reportGenerator.generate(reportTemplate, reportMetaInfo);
         return new ResponseEntity<>(
                 createRequestResponseEntity(httpServletRequest, reportMetaInfo.id(), isInternalRequest), HttpStatus.OK);

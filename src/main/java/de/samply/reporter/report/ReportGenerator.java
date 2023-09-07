@@ -10,6 +10,10 @@ import de.samply.reporter.exporter.ExporterClientException;
 import de.samply.reporter.logger.BufferedLoggerFactory;
 import de.samply.reporter.logger.Logger;
 import de.samply.reporter.report.metainfo.ReportMetaInfo;
+import de.samply.reporter.report.metainfo.ReportMetaInfoManager;
+import de.samply.reporter.report.metainfo.ReportMetaInfoManagerException;
+import de.samply.reporter.report.workbook.WorkbookManager;
+import de.samply.reporter.report.workbook.WorkbookManagerFactory;
 import de.samply.reporter.script.ScriptEngineException;
 import de.samply.reporter.script.ScriptEngineManager;
 import de.samply.reporter.script.ScriptResult;
@@ -23,15 +27,17 @@ import de.samply.reporter.utils.FileUtils;
 import de.samply.reporter.utils.PercentageLogger;
 import de.samply.reporter.zip.ExporterUnzipper;
 import de.samply.reporter.zip.ExporterUnzipperException;
-import org.apache.poi.ss.usermodel.*;
+import de.samply.reporter.zip.Zipper;
+import de.samply.reporter.zip.ZipperException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.streaming.SXSSFSheet;
-import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileSystemUtils;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +54,8 @@ public class ReportGenerator {
     private final ExporterUnzipper exporterUnzipper;
     private final ScriptEngineManager scriptEngineManager;
     private final ContextGenerator contextGenerator;
+    private final WorkbookManagerFactory workbookManagerFactory;
+    private final ReportMetaInfoManager reportMetaInfoManager;
     private final Integer workbookWindow;
 
 
@@ -56,6 +64,8 @@ public class ReportGenerator {
             ExporterUnzipper exporterUnzipper,
             ScriptEngineManager scriptEngineManager,
             ContextGenerator contextGenerator,
+            WorkbookManagerFactory workbookManagerFactory,
+            ReportMetaInfoManager reportMetaInfoManager,
             @Value(ReporterConst.EXCEL_WORKBOOK_WINDOW_SV) int workbookWindow
     ) {
         this.exporterClient = exporterClient;
@@ -63,6 +73,8 @@ public class ReportGenerator {
         this.scriptEngineManager = scriptEngineManager;
         this.contextGenerator = contextGenerator;
         this.workbookWindow = workbookWindow;
+        this.reportMetaInfoManager = reportMetaInfoManager;
+        this.workbookManagerFactory = workbookManagerFactory;
     }
 
     public void generate(ReportTemplate template, ReportMetaInfo reportMetaInfo)
@@ -84,20 +96,21 @@ public class ReportGenerator {
         Map<Script, ScriptResult> scriptResultMap = scriptEngineManager.generateRawReport(
                 template, context);
         logger.info("Generating excel file");
-        Workbook workbook = new SXSSFWorkbook(workbookWindow);
+        WorkbookManager workbookManager = workbookManagerFactory.create();
         logger.info("Filling excel file with data...");
-        fillWorkbookWithData(workbook, template, scriptResultMap);
+        fillWorkbookWithData(workbookManager, template, scriptResultMap);
         logger.info("Adding format to excel file...");
-        addFormatToWorkbook(workbook, template, context);
+        workbookManager.apply(workbook -> addFormatToWorkbook(workbook, template, context));
         logger.info("Writing excel file...");
-        writeWorkbook(reportMetaInfo.path(), workbook);
+        workbookManager.writeWorkbook(reportMetaInfo.path());
         logger.info("Removing temporal files...");
         removeTemporalFiles(paths[0].getParent(), scriptResultMap.values());
+        logger.info("Zipping files if necessary...");
+        createZipIfMoreThanOneFile(workbookManager, reportMetaInfo);
         logger.info("Excel file generated satisfactory.");
     }
 
-    private void removeTemporalFiles(Path sourceFilesDirectory,
-                                     Collection<ScriptResult> scriptResults) {
+    private void removeTemporalFiles(Path sourceFilesDirectory, Collection<ScriptResult> scriptResults) {
         try {
             removeTemporalFilesWithoutExceptionHandling(sourceFilesDirectory, scriptResults);
         } catch (IOException e) {
@@ -126,103 +139,59 @@ public class ReportGenerator {
         }
     }
 
-    private void writeWorkbook(Path path, Workbook workbook) {
-        try (FileOutputStream fileOutputStream = new FileOutputStream(path.toFile())) {
-            workbook.write(fileOutputStream);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void fillWorkbookWithData(Workbook workbook, ReportTemplate template,
+    private void fillWorkbookWithData(WorkbookManager workbookManager, ReportTemplate template,
                                       Map<Script, ScriptResult> scriptResultMap) {
         template.getSheetTemplates()
                 .forEach(sheetTemplate -> {
                     logger.info("Adding sheet '" + sheetTemplate.getName() + "'...");
                     if (sheetTemplate.getFileUrl() != null || sheetTemplate.getFilePath() != null) {
-                        addSheetFromSourceExcelFile(workbook, sheetTemplate);
+                        addSheetFromSourceExcelFile(workbookManager, sheetTemplate);
                     } else {
-                        fillSheetWithData(workbook, sheetTemplate, scriptResultMap);
+                        fillSheetWithData(workbookManager, sheetTemplate, scriptResultMap);
                     }
                 });
     }
 
-    private void addSheetFromSourceExcelFile(Workbook workbook, SheetTemplate template) {
+    private void addSheetFromSourceExcelFile(WorkbookManager workbookManager, SheetTemplate template) {
         try {
-            ExternalSheetUtils.addSheetFromSourceExcelFile(workbook, template);
+            ExternalSheetUtils.addSheetFromSourceExcelFile(workbookManager, template);
         } catch (ExternalSheetUtilsException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void fillSheetWithData(Workbook workbook, SheetTemplate template,
+    private void fillSheetWithData(WorkbookManager workbookManager, SheetTemplate template,
                                    Map<Script, ScriptResult> scriptResultMap) {
-        Sheet sheet = createSheet(workbook, template);
-        createHeaderRow(workbook, sheet, template);
         if (template.getValuesScript() != null) {
             ScriptResult result = scriptResultMap.get(template.getValuesScript().getScript());
             if (result != null) {
-                fillSheetWithData(sheet, result);
+                fillSheetWithData(workbookManager, template, result);
                 logger.info("Adding autosize to sheet '" + template.getName() + "'...");
-                autoSizeSheet(sheet);
+                workbookManager.apply(template, this::autoSizeSheet);
                 logger.info("Adding auto filter to sheet '" + template.getName() + "'...");
-                addAutoFilter(sheet);
+                workbookManager.apply(template, this::addAutoFilter);
             }
         }
     }
 
-    private Sheet createSheet(Workbook workbook, SheetTemplate template) {
-        Sheet sheet = workbook.createSheet(template.getName());
-        if (sheet instanceof SXSSFSheet) {
-            ((SXSSFSheet) sheet).trackAllColumnsForAutoSizing();
-        }
-        return sheet;
-    }
-
-    private void createHeaderRow(Workbook workbook, Sheet sheet, SheetTemplate template) {
-        if (!template.getColumnTemplates().isEmpty()) {
-            logger.info("Creating header row for sheet '" + template.getName() + "'...");
-            Row row = sheet.createRow(0);
-            AtomicInteger counter = new AtomicInteger(0);
-            template.getColumnTemplates().forEach(
-                    columnTemplate -> row.createCell(counter.getAndIncrement())
-                            .setCellValue(columnTemplate.getName()));
-            sheet.createFreezePane(0, 1);
-            boldHeaderRow(workbook, row);
-        }
-    }
-
-    private void boldHeaderRow(Workbook workbook, Row titleRow) {
-        CellStyle cellStyle = workbook.createCellStyle();
-        Font font = workbook.createFont();
-        font.setBold(true);
-        cellStyle.setFont(font);
-        for (int j = 0; j < titleRow.getLastCellNum(); j++) {
-            Cell cell = titleRow.getCell(j);
-            cell.setCellStyle(cellStyle);
-        }
-    }
-
-    private void fillSheetWithData(Sheet sheet, ScriptResult result) {
+    private void fillSheetWithData(WorkbookManager workbookManager, SheetTemplate template, ScriptResult result) {
         try {
-            fillSheetWithDataWithoutExceptionHandling(sheet, result);
+            fillSheetWithDataWithoutExceptionHandling(workbookManager, template, result);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void fillSheetWithDataWithoutExceptionHandling(Sheet sheet, ScriptResult result)
+    private void fillSheetWithDataWithoutExceptionHandling(WorkbookManager workbookManager, SheetTemplate template, ScriptResult result)
             throws IOException {
-        AtomicInteger rowIndex = new AtomicInteger(sheet.getLastRowNum() + 1);
         PercentageLogger percentageLogger = new PercentageLogger(logger,
                 (int) FileUtils.fetchNumberOfLines(result.rawResult()),
-                "Filling sheet" + sheet.getSheetName() + " with data...");
+                "Filling sheet" + template.getName() + " with data...");
         Files.readAllLines(result.rawResult())
-                .forEach(
-                        line -> {
-                            fillRowWithData(sheet.createRow(rowIndex.getAndIncrement()), line, result);
-                            percentageLogger.incrementCounter();
-                        });
+                .forEach(line -> {
+                    fillRowWithData(workbookManager.createRow(template), line, result);
+                    percentageLogger.incrementCounter();
+                });
     }
 
     private void fillRowWithData(Row row, String line, ScriptResult result) {
@@ -279,12 +248,14 @@ public class ReportGenerator {
                                      ColumnTemplate columnTemplate, int columnNumber, CellStyleContext cellStyleContext,
                                      Context context) {
         Sheet sheet = workbook.getSheet(sheetTemplate.getName());
-        logger.info("Adding header format to column '" + columnTemplate.getName() + "' in sheet '"
-                + sheetTemplate.getName() + "'...");
-        addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
-        logger.info("Adding value format to column '" + columnTemplate.getName() + "' in sheet '"
-                + sheetTemplate.getName() + "'...");
-        addValueFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
+        if (sheet != null) {
+            logger.info("Adding header format to column '" + columnTemplate.getName() + "' in sheet '"
+                    + sheetTemplate.getName() + "'...");
+            addHeaderFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
+            logger.info("Adding value format to column '" + columnTemplate.getName() + "' in sheet '"
+                    + sheetTemplate.getName() + "'...");
+            addValueFormatToWorkbook(columnTemplate, sheet, columnNumber, cellStyleContext, context);
+        }
     }
 
     private void addHeaderFormatToWorkbook(ColumnTemplate template, Sheet sheet, int columnNumber,
@@ -318,14 +289,16 @@ public class ReportGenerator {
                                              CellStyleContext cellStyleContext, Context context, Script script) {
         CellContext cellContext = fetchCellContext(script, cellStyleContext, context);
         Sheet sheet = workbook.getSheet(sheetTemplate.getName());
-        logger.info("Adding format to sheet '" + sheetTemplate.getName() + "'...");
-        cellContext.applySheetStyleToSheet(sheet);
-        PercentageLogger percentageLogger = new PercentageLogger(logger, sheet.getLastRowNum(),
-                "Adding format to all cells of sheet '" + sheetTemplate.getName() + "'...");
-        sheet.forEach(row -> {
-            row.forEach(cellContext::applyCellStyleToCell);
-            percentageLogger.incrementCounter();
-        });
+        if (sheet != null) {
+            logger.info("Adding format to sheet '" + sheetTemplate.getName() + "'...");
+            cellContext.applySheetStyleToSheet(sheet);
+            PercentageLogger percentageLogger = new PercentageLogger(logger, sheet.getLastRowNum(),
+                    "Adding format to all cells of sheet '" + sheetTemplate.getName() + "'...");
+            sheet.forEach(row -> {
+                row.forEach(cellContext::applyCellStyleToCell);
+                percentageLogger.incrementCounter();
+            });
+        }
     }
 
     private CellContext fetchCellContext(Script script, CellStyleContext cellStyleContext,
@@ -334,6 +307,24 @@ public class ReportGenerator {
             return scriptEngineManager.generateCellContext(script, cellStyleContext, context);
         } catch (ScriptEngineException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private void createZipIfMoreThanOneFile(WorkbookManager workbookManager, ReportMetaInfo reportMetaInfo) {
+        try {
+            createZipIfMoreThanOneFileWithoutHandlingException(workbookManager, reportMetaInfo);
+        } catch (ReportMetaInfoManagerException | IOException | ZipperException e) {
+            logger.info(ExceptionUtils.getStackTrace(e));
+        }
+    }
+
+    private void createZipIfMoreThanOneFileWithoutHandlingException(WorkbookManager workbookManager, ReportMetaInfo reportMetaInfo)
+            throws ReportMetaInfoManagerException, IOException, ZipperException {
+        if (workbookManager.isMultiWorkbook()) {
+            Path zippedPath = Zipper.zip(workbookManager.fetchRealPaths(reportMetaInfo.path()));
+            reportMetaInfoManager.reset();
+            reportMetaInfoManager.addReportMetaInfoToFile(
+                    new ReportMetaInfo(reportMetaInfo.id(), zippedPath, reportMetaInfo.timestamp()));
         }
     }
 
