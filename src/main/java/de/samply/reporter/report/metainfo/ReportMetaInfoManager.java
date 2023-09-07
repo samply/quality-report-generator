@@ -35,6 +35,10 @@ public class ReportMetaInfoManager {
         this.reportsMetaInfoFile = this.reportsDirectory.resolve(reportsMetaInfoFilename);
         this.variablesReplacer = variablesReplacer;
 
+        reset();
+    }
+
+    public void reset() throws ReportMetaInfoManagerException, IOException {
         ReportMetaInfo[] reportMetaInfos = fetchAllExistingReportMetaInfos();
         recreateReportMetaInfoFile(List.of(reportMetaInfos));
     }
@@ -50,8 +54,7 @@ public class ReportMetaInfoManager {
         return reportMetaInfo;
     }
 
-    private void addReportMetaInfoToFile(ReportMetaInfo reportMetaInfo)
-            throws ReportMetaInfoManagerException {
+    public void addReportMetaInfoToFile(ReportMetaInfo reportMetaInfo) throws ReportMetaInfoManagerException {
         try {
             addReportMetaInfoToFileWithoutExceptionHandling(reportMetaInfo);
         } catch (IOException e) {
