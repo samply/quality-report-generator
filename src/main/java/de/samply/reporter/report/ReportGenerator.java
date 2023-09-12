@@ -216,7 +216,7 @@ public class ReportGenerator {
     private void addAutoFilter(Sheet sheet) {
         int rowStartIndex = 0;
         int rowEndIndex = sheet.getLastRowNum();
-        if (rowEndIndex >= 0) {
+        if (rowEndIndex >= 0 && sheet.getRow(0) != null) {
             int columnStartIndex = 0;
             int columnEndIndex = sheet.getRow(0).getLastCellNum() - 1;
 
