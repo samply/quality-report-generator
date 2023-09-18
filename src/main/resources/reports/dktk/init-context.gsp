@@ -143,14 +143,18 @@ Index: Attribute
                             if (patients == null) {
                                 patients = [] as Set
                             }
-                            ((Set) patients).add(patientId)
+                            if (value != emptyValue){
+                                ((Set) patients).add(patientId)
+                            }
                             dataModel.putElement(patients, patientsProAttributeValueKey, header, value)
 
                             patients = dataModel.getElement(patientsProAttributeKey, header)
                             if (patients == null) {
                                 patients = [] as Set
                             }
-                            ((Set) patients).add(patientId)
+                            if (value != emptyValue){
+                                ((Set) patients).add(patientId)
+                            }
                             dataModel.putElement(patients, patientsProAttributeKey, header)
 
                         } else {

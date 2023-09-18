@@ -43,11 +43,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Get all Template IDs
 - Download report template
 - Split Excel file if too large and zip
+- Numeric and string cell values
 
 
 ### Changed
 - Project name: quality-report-generator to reporter
 - Bugfix: Exporter Template
+- Bugfix: Patients pro Attribute
 
 ### Fixed
 - Intellij Warnings

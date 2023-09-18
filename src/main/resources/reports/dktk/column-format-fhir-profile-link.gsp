@@ -1,10 +1,12 @@
 <%@ page import="de.samply.reporter.context.Context; org.apache.poi.ss.usermodel.Hyperlink; de.samply.reporter.context.CellContext" %>
-<% CellContext cellDataModel = cellContext %>
-<% Context dataModel = context %>
+<%
+    CellContext cellDataModel = cellContext
+    Context dataModel = context
+%>
 <%
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
     cellDataModel.addCellModifier { cell ->
-        def metaInfo = attributeMetaInfo[cell.getStringCellValue()]
+        def metaInfo = attributeMetaInfo[cellDataModel.getCellValueAsString(cell)]
         if (metaInfo != null){
             def url = metaInfo[2]
             if (url != null && url.trim().size() > 0){
