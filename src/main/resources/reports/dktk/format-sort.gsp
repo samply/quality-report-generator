@@ -4,19 +4,19 @@
     def columnNumber = 1
     def rowColumnExtractor = (row, column) -> {
         def indexes = []
-        def cellValue = row.getCell(columnNumber).getStringCellValue()
+        def cellValue = cellDataModel.getCellValueAsString(row.getCell(columnNumber))
         if (cellValue != null && cellValue.trim().size() > 0) {
             indexes.addAll(cellValue.split('-'))
         } else {
             indexes.addAll('Z-1'.split('-'))
         }
-        cellValue = row.getCell(0).getStringCellValue()
+        cellValue = cellDataModel.getCellValueAsString(row.getCell(0))
         if (cellValue != null && cellValue.trim().size() > 0) {
             indexes.addAll(cellValue.split(':'))
         } else{
             indexes.addAll('urn:zzzz:1:1'.split(':'))
         }
-        cellValue = row.getCell(2).getStringCellValue()
+        cellValue = cellDataModel.getCellValueAsString(row.getCell(2))
         if (cellValue != null && cellValue.trim().size() > 0) {
             indexes.add(cellValue)
         }

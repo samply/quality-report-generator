@@ -1,12 +1,14 @@
 <%@ page import="de.samply.reporter.context.Context; org.apache.poi.ss.usermodel.Hyperlink; de.samply.reporter.context.CellContext" %>
-<% CellContext cellDataModel = cellContext %>
-<% Context dataModel = context %>
+<%
+    CellContext cellDataModel = cellContext
+    Context dataModel = context
+%>
 <%
     def createMdrLink = urn -> 'https://mdr.ccp-it.dktk.dkfz.de/detail.xhtml?urn=' + ((String) urn).replace(":", "%3A")
     def attributeMetaInfo = dataModel.getElement("Attribute Meta Info")
     cellDataModel.addCellModifier { cell ->
         def index = dataModel.getColumnIndex("filtered elements", "data element FHIR")
-        def metaInfo = attributeMetaInfo[cell.getRow().getCell(index).getStringCellValue()]
+        def metaInfo = attributeMetaInfo[cellDataModel.getCellValueAsString(cell.getRow().getCell(index))]
         if (metaInfo != null){
             def url = metaInfo[4]
             if (url != null && url.trim().size() > 0){

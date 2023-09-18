@@ -2,10 +2,9 @@
 <% CellContext cellDataModel = cellContext %>
 <%
     cellDataModel.setCellStyle { workbook, cellStyle ->
-        def font = workbook.createFont()
-        font.setColor(org.apache.poi.hssf.util.HSSFColor.HSSFColorPredefined.GOLD.getIndex())
-        font.setBold(true)
-        cellStyle.setFont(font)
+        def dataFormat = workbook.createDataFormat()
+        def numberFormatIndex = dataFormat.getFormat("0")
+        cellStyle.setDataFormat(numberFormatIndex)
+        cellStyle.set
     }
 %>
-<% cellDataModel.setCondition { cell -> cellDataModel.getCellValueAsString(cell).equalsIgnoreCase("not validated") } %>

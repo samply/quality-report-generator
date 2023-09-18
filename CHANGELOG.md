@@ -43,6 +43,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Get all Template IDs
 - Download report template
 - Split Excel file if too large and zip
+- Numeric and string cell values
 
 
 ### Changed
