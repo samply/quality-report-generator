@@ -20,7 +20,7 @@
             for (tempCell in patientIdsRow) {
                 def attributeIndex = dataModel.getColumnIndex("filtered elements", "data element FHIR")
                 def valueIndex = dataModel.getColumnIndex("filtered elements", "value FHIR")
-                if (tempCell.getStringCellValue().contains(cell.getRow().getCell(attributeIndex).getStringCellValue()) && tempCell.getStringCellValue().contains(cell.getRow().getCell(valueIndex).getStringCellValue())) {
+                if (cellDataModel.getCellValueAsString(tempCell).contains(cellDataModel.getCellValueAsString(cell.getRow().getCell(attributeIndex))) && cellDataModel.getCellValueAsString(tempCell).contains(cellDataModel.getCellValueAsString(cellDataModel.getCellValueAsString(cell.getRow().getCell(valueIndex))))) {
                     char columnLetter = (char) (((int) 'A') + tempCell.columnIndex)
                     def address = "'" + patientIdsRow.getSheet().getSheetName() + "'!" + columnLetter + "1"
                     hyperlink.setAddress(address)
@@ -31,4 +31,4 @@
         }
     }
 %>
-<% cellDataModel.setCondition { cell -> cell.getStringCellValue().equalsIgnoreCase("mismatch") } %>
+<% cellDataModel.setCondition { cell -> cellDataModel.getCellValueAsString(cell).equalsIgnoreCase("mismatch") } %>

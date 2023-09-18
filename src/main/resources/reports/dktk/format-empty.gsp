@@ -12,5 +12,5 @@
 %>
 <%
     def index = dataModel.getColumnIndex("filtered elements", "value FHIR")
-    cellDataModel.setCondition { cell -> cell.getRow().getCell(index).getStringCellValue().trim().equals("") }
+    cellDataModel.setCondition { cell -> cellDataModel.getCellValueAsString(cell.getRow().getCell(index)).trim().equals("") }
 %>

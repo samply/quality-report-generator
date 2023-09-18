@@ -7,10 +7,8 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+
+import org.apache.poi.ss.usermodel.*;
 
 public class CellContext {
 
@@ -19,6 +17,8 @@ public class CellContext {
   private Function<Cell, Boolean> condition;
   private final List<Consumer<Cell>> cellModifiers = new ArrayList<>();
   private final List<Consumer<Sheet>> sheetModifiers = new ArrayList<>();
+
+  private final DataFormatter dataFormatter = new DataFormatter();
 
   public CellContext(CellStyleContext cellStyleContext) {
     this.cellStyleContext = cellStyleContext;
@@ -58,5 +58,10 @@ public class CellContext {
       sheetModifiers.forEach(sheetModifier -> sheetModifier.accept(sheet));
     }
   }
+
+  public String getCellValueAsString(Cell cell){
+    return (cell != null) ? dataFormatter.formatCellValue(cell) : "";
+  }
+
 
 }

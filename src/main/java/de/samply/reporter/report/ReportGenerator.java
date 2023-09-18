@@ -30,6 +30,8 @@ import de.samply.reporter.zip.ExporterUnzipperException;
 import de.samply.reporter.zip.Zipper;
 import de.samply.reporter.zip.ZipperException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -197,8 +199,21 @@ public class ReportGenerator {
     private void fillRowWithData(Row row, String line, ScriptResult result) {
         AtomicInteger columnIndex = new AtomicInteger(0);
         Arrays.stream(line.split(result.csvConfig().delimiter())).forEach(
-                value -> row.createCell(columnIndex.getAndIncrement())
-                        .setCellValue((value != null) ? value : ReporterConst.EMPTY_EXCEL_CELL));
+                value -> setCellValue(row.createCell(columnIndex.getAndIncrement()), value));
+    }
+
+    private void setCellValue(Cell cell, String value) {
+        if (value == null) {
+            cell.setCellValue(ReporterConst.EMPTY_EXCEL_CELL);
+        } else if (NumberUtils.isParsable(value)) {
+            if (NumberUtils.isDigits(value)) {
+                cell.setCellValue(Integer.valueOf(value));
+            } else {
+                cell.setCellValue(Double.valueOf(value));
+            }
+        } else {
+            cell.setCellValue(value);
+        }
     }
 
     private void autoSizeSheet(Sheet sheet) {
