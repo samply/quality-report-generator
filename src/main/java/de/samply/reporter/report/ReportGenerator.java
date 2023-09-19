@@ -194,6 +194,7 @@ public class ReportGenerator {
                     fillRowWithData(workbookManager.createRow(template), line, result);
                     percentageLogger.incrementCounter();
                 });
+        workbookManager.fetchLastSheetAndCreateIfNotExist(template); // Be sure that sheet is created even if it is empty
     }
 
     private void fillRowWithData(Row row, String line, ScriptResult result) {
