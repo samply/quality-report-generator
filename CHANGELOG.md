@@ -50,6 +50,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Project name: quality-report-generator to reporter
 - Bugfix: Exporter Template
 - Bugfix: Patients pro Attribute
+- Bugfix: Create sheet if it does not exist
 
 ### Fixed
 - Intellij Warnings
