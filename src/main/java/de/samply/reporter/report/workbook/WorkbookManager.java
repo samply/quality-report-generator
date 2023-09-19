@@ -33,6 +33,11 @@ public class WorkbookManager {
         return (sheets != null) ? Optional.of(sheets.get(sheets.size() - 1)) : Optional.empty();
     }
 
+    public Sheet fetchLastSheetAndCreateIfNotExist (SheetTemplate template){
+        Optional<Sheet> lastSheet = fetchLastSheet(template);
+        return (lastSheet.isPresent()) ? lastSheet.get() : createSheet(template);
+    }
+
     public void apply(SheetTemplate template, Consumer<Sheet> sheetConsumer) {
         List<Sheet> sheets = templateSheetsMap.get(template);
         if (sheets != null) {
