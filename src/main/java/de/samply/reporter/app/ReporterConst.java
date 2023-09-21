@@ -20,6 +20,7 @@ public class ReporterConst {
     public static final String REPORTS_LIST = "/reports-list";
     public static final String LOGS = "/logs";
     public static final String REPORT_TEMPLATE_IDS = "/report-template-ids";
+    public static final String RUNNING_REPORTS = "/running-reports";
 
     // REST Parameters
     public static final String REPORT_TEMPLATE_ID = "template-id";

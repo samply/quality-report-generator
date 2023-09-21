@@ -1,6 +1,7 @@
 package de.samply.reporter.report.metainfo;
 
 import de.samply.reporter.app.ReporterConst;
+import de.samply.reporter.report.RunningReportsManager;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.utils.VariablesReplacer;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -25,15 +26,18 @@ public class ReportMetaInfoManager {
     private final Path reportsMetaInfoFile;
     private final Path reportsDirectory;
     private final VariablesReplacer variablesReplacer;
+    private final RunningReportsManager runningReportsManager;
 
     public ReportMetaInfoManager(
             VariablesReplacer variablesReplacer,
+            RunningReportsManager runningReportsManager,
             @Value(ReporterConst.REPORTS_DIRECTORY_SV) String reportsDirectory,
             @Value(ReporterConst.REPORTS_META_INFO_FILENAME_SV) String reportsMetaInfoFilename
     ) throws ReportMetaInfoManagerException, IOException {
         this.reportsDirectory = Path.of(reportsDirectory);
         this.reportsMetaInfoFile = this.reportsDirectory.resolve(reportsMetaInfoFilename);
         this.variablesReplacer = variablesReplacer;
+        this.runningReportsManager = runningReportsManager;
 
         reset();
     }
@@ -107,6 +111,13 @@ public class ReportMetaInfoManager {
     public ReportMetaInfo[] fetchAllExistingReportMetaInfos() throws ReportMetaInfoManagerException {
         return fetchAllReportMetaInfos(
                 Optional.of(reportMetaInfo -> reportMetaInfo.path().toFile().exists()));
+    }
+
+    public ReportMetaInfo[] fetchRunningReportMetaInfos() throws ReportMetaInfoManagerException {
+        return fetchAllReportMetaInfos(
+                Optional.of(reportMetaInfo ->
+                        !reportMetaInfo.path().toFile().exists() &&
+                                runningReportsManager.isReportIdRunning(reportMetaInfo.id())));
     }
 
     public ReportMetaInfo[] fetchAllReportMetaInfos(
