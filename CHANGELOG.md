@@ -46,6 +46,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Numeric and string cell values
 - Running Report Manager
 - Clear Logger Buffer
+- Sort Source Paths in Context
 
 
 ### Changed
