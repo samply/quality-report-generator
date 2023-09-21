@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0 - 2023-09-07]
+## [1.0.0 - 2023-09-21]
 ### Added
 - Gitignore
 - Dockerignore
@@ -44,6 +44,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Download report template
 - Split Excel file if too large and zip
 - Numeric and string cell values
+- Running Report Manager
+- Clear Logger Buffer
+- Sort Source Paths in Context
 
 
 ### Changed

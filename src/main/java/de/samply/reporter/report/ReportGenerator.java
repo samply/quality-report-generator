@@ -59,6 +59,7 @@ public class ReportGenerator {
     private final WorkbookManagerFactory workbookManagerFactory;
     private final ReportMetaInfoManager reportMetaInfoManager;
     private final Integer workbookWindow;
+    private final RunningReportsManager runningReportsManager;
 
 
     public ReportGenerator(
@@ -68,6 +69,7 @@ public class ReportGenerator {
             ContextGenerator contextGenerator,
             WorkbookManagerFactory workbookManagerFactory,
             ReportMetaInfoManager reportMetaInfoManager,
+            RunningReportsManager runningReportsManager,
             @Value(ReporterConst.EXCEL_WORKBOOK_WINDOW_SV) int workbookWindow
     ) {
         this.exporterClient = exporterClient;
@@ -77,11 +79,13 @@ public class ReportGenerator {
         this.workbookWindow = workbookWindow;
         this.reportMetaInfoManager = reportMetaInfoManager;
         this.workbookManagerFactory = workbookManagerFactory;
+        this.runningReportsManager = runningReportsManager;
     }
 
     public void generate(ReportTemplate template, ReportMetaInfo reportMetaInfo)
             throws ReportGeneratorException {
         try {
+            runningReportsManager.addRunningReportId(reportMetaInfo.id());
             exporterClient.fetchExportFiles(filePath -> generate(template, filePath, reportMetaInfo),
                     template);
         } catch (ExporterClientException | RuntimeException e) {
@@ -109,7 +113,9 @@ public class ReportGenerator {
         removeTemporalFiles(paths[0].getParent(), scriptResultMap.values());
         logger.info("Zipping files if necessary...");
         createZipIfMoreThanOneFile(workbookManager, reportMetaInfo);
+        runningReportsManager.removeRunningReportId(reportMetaInfo.id());
         logger.info("Excel file generated satisfactory.");
+        BufferedLoggerFactory.clearBuffer();
     }
 
     private void removeTemporalFiles(Path sourceFilesDirectory, Collection<ScriptResult> scriptResults) {
