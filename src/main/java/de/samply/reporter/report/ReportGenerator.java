@@ -89,6 +89,8 @@ public class ReportGenerator {
             exporterClient.fetchExportFiles(filePath -> generate(template, filePath, reportMetaInfo),
                     template);
         } catch (ExporterClientException | RuntimeException e) {
+            runningReportsManager.removeRunningReportId(reportMetaInfo.id());
+            BufferedLoggerFactory.clearBuffer();
             throw new ReportGeneratorException(e);
         }
     }
