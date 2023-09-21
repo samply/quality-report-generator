@@ -218,5 +218,10 @@ public class ReporterController {
         return createResponseEntity(reportTemplatePath.get());
     }
 
+    @GetMapping(value = ReporterConst.RUNNING_REPORTS)
+    public ResponseEntity fetchRunningReports() throws ReportMetaInfoManagerException {
+        return ResponseEntity.ok().body(reportMetaInfoManager.fetchRunningReportMetaInfos());
+    }
+
 
 }
