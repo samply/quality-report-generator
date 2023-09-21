@@ -45,6 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Split Excel file if too large and zip
 - Numeric and string cell values
 - Running Report Manager
+- Clear Logger Buffer
 
 
 ### Changed

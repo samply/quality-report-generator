@@ -115,6 +115,7 @@ public class ReportGenerator {
         createZipIfMoreThanOneFile(workbookManager, reportMetaInfo);
         runningReportsManager.removeRunningReportId(reportMetaInfo.id());
         logger.info("Excel file generated satisfactory.");
+        BufferedLoggerFactory.clearBuffer();
     }
 
     private void removeTemporalFiles(Path sourceFilesDirectory, Collection<ScriptResult> scriptResults) {
