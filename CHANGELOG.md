@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Running Report Manager
 - Clear Logger Buffer
 - Sort Source Paths in Context
+- Manage Exception during report generation
 
 
 ### Changed
