@@ -348,7 +348,7 @@ public class ReportGenerator {
             Path zippedPath = Zipper.zip(workbookManager.fetchRealPaths(reportMetaInfo.path()));
             reportMetaInfoManager.reset();
             reportMetaInfoManager.addReportMetaInfoToFile(
-                    new ReportMetaInfo(reportMetaInfo.id(), zippedPath, reportMetaInfo.timestamp()));
+                    new ReportMetaInfo(reportMetaInfo.id(), zippedPath, reportMetaInfo.timestamp(), reportMetaInfo.templateId()));
         }
     }
 

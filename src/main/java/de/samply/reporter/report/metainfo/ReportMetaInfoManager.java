@@ -53,7 +53,7 @@ public class ReportMetaInfoManager {
                 variablesReplacer.fetchQualityReportFilename(template));
         String timestamp = fetchCurrentTimestamp();
         String reportId = generateReportId();
-        ReportMetaInfo reportMetaInfo = new ReportMetaInfo(reportId, reportPath, timestamp);
+        ReportMetaInfo reportMetaInfo = new ReportMetaInfo(reportId, reportPath, timestamp, template.getId());
         addReportMetaInfoToFile(reportMetaInfo);
         return reportMetaInfo;
     }

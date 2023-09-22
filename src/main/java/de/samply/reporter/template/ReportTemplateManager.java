@@ -3,6 +3,7 @@ package de.samply.reporter.template;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import de.samply.reporter.app.ReporterConst;
 import de.samply.reporter.template.script.ScriptParser;
+import de.samply.reporter.utils.VariablesReplacer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +19,18 @@ import static java.nio.file.Files.*;
 @Component
 public class ReportTemplateManager {
 
+    private final VariablesReplacer variablesReplacer;
+    private final String customTemplateId;
     private final Map<String, ReportTemplate> idQualityReportTemplateMap = new HashMap<>();
     private final Map<String, Path> idQualityReportTemplatePathMap = new HashMap<>();
 
     public ReportTemplateManager(
+            VariablesReplacer variablesReplacer,
+            @Value(ReporterConst.CUSTOM_TEMPLATE_ID_SV) String customTemplateId,
             @Value(ReporterConst.REPORT_TEMPLATE_DIRECTORY_SV) String qualityReportTemplateDirectory
     ) {
+        this.variablesReplacer = variablesReplacer;
+        this.customTemplateId = customTemplateId;
         loadTemplates(Path.of(qualityReportTemplateDirectory));
     }
 
@@ -64,8 +71,17 @@ public class ReportTemplateManager {
     }
 
     public ReportTemplate fetchTemplate(String template) throws IOException {
-        return new XmlMapper().readValue(ScriptParser.readTemplateAndParseScripts(template),
-                ReportTemplate.class);
+        return new XmlMapper().readValue(ScriptParser.readTemplateAndParseScripts(template), ReportTemplate.class);
+    }
+
+    public ReportTemplate fetchTemplateAndGenerateCustomTemplateId(String template) throws IOException {
+        ReportTemplate result = fetchTemplate(template);
+        result.setId(generateCustomTemplateId());
+        return result;
+    }
+
+    private String generateCustomTemplateId() {
+        return variablesReplacer.replaceTimestamp(customTemplateId);
     }
 
     public ReportTemplate getQualityReportTemplate(String qualityReportTemplateId) {
