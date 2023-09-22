@@ -77,6 +77,7 @@ public class ReporterConst {
     public final static String WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES = "WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES";
     public final static String IS_EXPORTER_IN_SAME_SERVER = "IS_EXPORTER_IN_SAME_SERVER";
     public final static String MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET = "MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET";
+    public final static String CUSTOM_TEMPLATE_ID = "CUSTOM_TEMPLATE_ID";
 
 
     // Spring Values (SV)
@@ -143,6 +144,8 @@ public class ReporterConst {
             HEAD_SV + IS_EXPORTER_IN_SAME_SERVER + ":true" + BOTTOM_SV;
     public final static String MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET_SV =
             HEAD_SV + MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET + ":100000" + BOTTOM_SV;
+    public final static String CUSTOM_TEMPLATE_ID_SV =
+            HEAD_SV + CUSTOM_TEMPLATE_ID + ":custom-{TIMESTAMP}" + BOTTOM_SV;
 
 
     // Other variables:

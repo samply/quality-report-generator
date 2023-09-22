@@ -83,7 +83,7 @@ public class ReporterController {
                         + MediaType.APPLICATION_XML_VALUE, HttpStatus.BAD_REQUEST);
             }
             try {
-                reportTemplate = reportTemplateManager.fetchTemplate(template);
+                reportTemplate = reportTemplateManager.fetchTemplateAndGenerateCustomTemplateId(template);
             } catch (IOException e) {
                 return new ResponseEntity<>(ExceptionUtils.getStackTrace(e), HttpStatus.INTERNAL_SERVER_ERROR);
             }

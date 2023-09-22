@@ -11,19 +11,22 @@ public record ReportMetaInfo(
     @JsonProperty("path") @JsonSerialize(using = PathSerializer.class)
     Path path,
     @JsonProperty("timestamp")
-    String timestamp
-) {
+    String timestamp,
+    @JsonProperty("template-id")
+    String templateId
+    ) {
 
   @Override
   public String toString() {
     return id + ReporterConst.REPORT_META_INFO_FILE_SEPARATOR + path.getFileName().toString()
-        + ReporterConst.REPORT_META_INFO_FILE_SEPARATOR + timestamp;
+        + ReporterConst.REPORT_META_INFO_FILE_SEPARATOR + timestamp + ReporterConst.REPORT_META_INFO_FILE_SEPARATOR + templateId;
   }
 
   public static ReportMetaInfo create(Path reportDirectory, String reportMetaInfoLine) {
     String id = null;
     Path path = null;
     String timestamp = null;
+    String templateId = null;
     if (reportMetaInfoLine != null) {
       String[] split = reportMetaInfoLine.split(ReporterConst.REPORT_META_INFO_FILE_SEPARATOR);
       if (split.length > 0) {
@@ -35,8 +38,11 @@ public record ReportMetaInfo(
       if (split.length > 2) {
         timestamp = split[2];
       }
+      if (split.length > 3) {
+        templateId = split[3];
+      }
     }
-    return new ReportMetaInfo(id, path, timestamp);
+    return new ReportMetaInfo(id, path, timestamp, templateId);
   }
 
 }
