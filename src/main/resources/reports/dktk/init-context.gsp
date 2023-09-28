@@ -51,7 +51,7 @@ Index: Attribute
              "ICD-O Katalog Topographie (Version)" : ["kann", "true", "https://simplifier.net/oncology/primaerdiagnose", "", "urn:dktk:dataelement:5:2", "Katalogversion der ICD-O", "String", "K-7"],
              "Entnahmedatum" : ["kann", "true", "https://simplifier.net/oncology/oncospecimen", "", "urn:dktk:dataelement:49:4", "Wann wurde die Probe entnommen (Entnahme-/Eingangsdatum)", "Date", "B-4"],
              "Datum des letztbekannten Vitalstatus" : ["MUSS", "true", "https://simplifier.net/oncology/vitalstatus", "", "urn:dktk:dataelement:48:3", "Entspricht dem Datum, an welchem dieser Verlauf zum Vitalstatus zuletzt dokumentiert wurde", "Date", "K-55"],
-             "Datum Fernmetastasen" : ["MUSS", "true", "https://simplifier.net/oncology/fernmetastasen-duplicate-2", "", "urn:dktk:dataelement:46:3", "Entspricht dem Datum, an welchem dieses Ereignis befundet wurde", "Date", "K-52"],
+             "Datum Fernmetastasen" : ["MUSS", "true", "https://simplifier.net/oncology/fernmetastasen-duplicate-2", "", "urn:dktk:dataelement:21:3", "Entspricht dem Datum, an welchem dieses Ereignis befundet wurde", "Date", "K-26"],
              "Datum lokales oder regionäres Rezidiv" : ["MUSS", "true", "https://simplifier.net/oncology/lokalertumorstatus", "", "urn:dktk:dataelement:43:3", "Entspricht dem Datum, an welchem dieses Ereignis befundet wurde", "Date", "K-48"],
              "Knochenmarktransplantation" : ["MUSS", "false", "https://simplifier.net/oncology/systemtherapie", "", "urn:dktk:dataelement:40:2", "Gibt an, ob eine Knochenmarktransplantation durchgeführt wurde", "Boolean", "K-42"],
              "Lokalisation" : ["MUSS", "true", "https://simplifier.net/oncology/primaerdiagnose", "", "urn:dktk:dataelement:4:2", "Bezeichnung der Topographie einer Erkrankung basierend auf der aktuellen ICD-O-3 Klassifizierung", "String", "K-6"],
@@ -143,14 +143,18 @@ Index: Attribute
                             if (patients == null) {
                                 patients = [] as Set
                             }
-                            ((Set) patients).add(patientId)
+                            if (value != emptyValue){
+                                ((Set) patients).add(patientId)
+                            }
                             dataModel.putElement(patients, patientsProAttributeValueKey, header, value)
 
                             patients = dataModel.getElement(patientsProAttributeKey, header)
                             if (patients == null) {
                                 patients = [] as Set
                             }
-                            ((Set) patients).add(patientId)
+                            if (value != emptyValue){
+                                ((Set) patients).add(patientId)
+                            }
                             dataModel.putElement(patients, patientsProAttributeKey, header)
 
                         } else {

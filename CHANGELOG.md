@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0 - 2023-08-04]
+## [1.1.0 - 2023-09-28]
 ### Added
 - Gitignore
 - Dockerignore
@@ -39,11 +39,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - HTTP TCP configuration
 - Not validated
 - CORS support
+- Report Meta Info Paging
+- Get all Template IDs
+- Download report template
+- Split Excel file if too large and zip
+- Numeric and string cell values
+- Running Report Manager
+- Clear Logger Buffer
+- Sort Source Paths in Context
+- Manage Exception during report generation
+- Custom Template ID
+- Deployment in Maven Central Repository
+- GPG Sign
 
 
 ### Changed
 - Project name: quality-report-generator to reporter
 - Bugfix: Exporter Template
+- Bugfix: Patients pro Attribute
+- Bugfix: Create sheet if it does not exist
 
 ### Fixed
 - Intellij Warnings

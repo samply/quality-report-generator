@@ -15,17 +15,22 @@ public class ReporterConst {
     public static final String INFO = "/info";
     public static final String GENERATE = "/generate";
     public static final String REPORT = "/report";
+    public static final String REPORT_TEMPLATE = "/report-template";
     public static final String REPORT_STATUS = "/report-status";
     public static final String REPORTS_LIST = "/reports-list";
     public static final String LOGS = "/logs";
+    public static final String REPORT_TEMPLATE_IDS = "/report-template-ids";
+    public static final String RUNNING_REPORTS = "/running-reports";
 
     // REST Parameters
     public static final String REPORT_TEMPLATE_ID = "template-id";
     public static final String EXPORT_URL = "export-url";
     public static final String REPORT_ID = "report-id";
     public static final String LOGS_SIZE = "logs-size";
-    public static final String LOGS_LAST_LINE = "logs-last-line";
+    public static final String LOGS_LAST_LINE_REPORTER = "logs-last-line-reporter";
     public static final String LOGS_LAST_LINE_EXPORTER = "logs-last-line-exporter";
+    public static final String REPORTS_LIST_PAGE_SIZE = "page-size";
+    public static final String REPORTS_LIST_PAGE = "page";
 
 
     // Exporter Variables
@@ -71,6 +76,8 @@ public class ReporterConst {
     public final static String WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS = "WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS";
     public final static String WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES = "WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES";
     public final static String IS_EXPORTER_IN_SAME_SERVER = "IS_EXPORTER_IN_SAME_SERVER";
+    public final static String MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET = "MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET";
+    public final static String CUSTOM_TEMPLATE_ID = "CUSTOM_TEMPLATE_ID";
 
 
     // Spring Values (SV)
@@ -122,7 +129,7 @@ public class ReporterConst {
     public final static String HTTP_SERVLET_REQUEST_SCHEME_SV =
             HEAD_SV + HTTP_SERVLET_REQUEST_SCHEME + ":http" + BOTTOM_SV;
     public final static String WEBCLIENT_BUFFER_SIZE_IN_BYTES_SV =
-            HEAD_SV + WEBCLIENT_BUFFER_SIZE_IN_BYTES + ":#{10 * 1024 * 1024}" + BOTTOM_SV;
+            HEAD_SV + WEBCLIENT_BUFFER_SIZE_IN_BYTES + ":#{36 * 1024 * 1024}" + BOTTOM_SV;
     public final static String WEBCLIENT_REQUEST_TIMEOUT_IN_SECONDS_SV =
             HEAD_SV + WEBCLIENT_REQUEST_TIMEOUT_IN_SECONDS + ":180" + BOTTOM_SV;
     public final static String WEBCLIENT_CONNECTION_TIMEOUT_IN_SECONDS_SV =
@@ -135,6 +142,10 @@ public class ReporterConst {
             HEAD_SV + WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES + ":10" + BOTTOM_SV;
     public final static String IS_EXPORTER_IN_SAME_SERVER_SV =
             HEAD_SV + IS_EXPORTER_IN_SAME_SERVER + ":true" + BOTTOM_SV;
+    public final static String MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET_SV =
+            HEAD_SV + MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET + ":100000" + BOTTOM_SV;
+    public final static String CUSTOM_TEMPLATE_ID_SV =
+            HEAD_SV + CUSTOM_TEMPLATE_ID + ":custom-{TIMESTAMP}" + BOTTOM_SV;
 
 
     // Other variables:

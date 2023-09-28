@@ -38,7 +38,7 @@ public class VariablesReplacer {
     return input;
   }
 
-  private String replaceTimestamp(String filename) {
+  public String replaceTimestamp(String filename) {
     if (filename.contains(ReporterConst.TEMPLATE_TIMESTAMP)) {
       String timestampFormat = this.timestampFormat;
       String templateStart = ReporterConst.TEMPLATE_TIMESTAMP + ReporterConst.TEMPLATE_SEPARATOR;
