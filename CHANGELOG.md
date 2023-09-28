@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.0 - 2023-09-22]
+## [1.0.0 - 2023-09-26]
 ### Added
 - Gitignore
 - Dockerignore
@@ -49,6 +49,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Sort Source Paths in Context
 - Manage Exception during report generation
 - Custom Template ID
+- Deployment in Maven Central Repository
 
 
 ### Changed
