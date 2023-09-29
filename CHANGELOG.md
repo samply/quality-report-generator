@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.4 - 2023-09-29]
+### Added
+
 ## [1.1.3 - 2023-09-29]
 ### Changed
 - Generate reporter-<version>.jar instead of reporter.jar
