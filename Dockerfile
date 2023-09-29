@@ -1,6 +1,6 @@
 FROM eclipse-temurin:20-jre
 
-COPY target/reporter.jar /app/
+COPY target/reporter-*.jar /app/reporter.jar
 
 WORKDIR /app
 

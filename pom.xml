@@ -128,7 +128,6 @@
     </dependencies>
 
     <build>
-        <finalName>reporter</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
