@@ -5,7 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.1.7 - 2023-10-2]
-### Added
+### Changed
+- Rename FHIR_QUERY to FHIR_PATH
 
 
 ## [1.1.6 - 2023-10-2]
