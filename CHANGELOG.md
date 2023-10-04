@@ -4,7 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.1.7 - 2023-10-2]
+## [1.1.7 - 2023-10-4]
+### Added
+- File Path in scripts
+
 ### Changed
 - Rename FHIR_QUERY to FHIR_PATH
 - Better error management in report generation
