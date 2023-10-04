@@ -168,5 +168,9 @@ public class ReporterConst {
     public final static int BUFFERED_LOGGER_SIZE = 1000;
     public final static String EXPORTER = "exporter";
     public final static String REPORTER = "reporter";
+    public final static String[][] IGNORE_LINE_IN_SCRIPT_TOKENS = {
+            {"@ignore"},
+            {"<%@", "page", "import"}
+    };
 
 }

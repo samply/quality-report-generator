@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.1.7 - 2023-10-4]
 ### Added
 - File Path in scripts
+- Ignore lines in script
 
 ### Changed
 - Rename FHIR_QUERY to FHIR_PATH

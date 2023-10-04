@@ -80,9 +80,10 @@ public class ReportTemplateManager {
 
     private ReportTemplate fetchScriptFilesAndAddToTemplate(ReportTemplate template) throws IOException {
         try {
-            fetchScriptReferences(template).forEach(sriptReference -> {
+            fetchScriptReferences(template).forEach(scriptReference -> {
                 try {
-                    fetchScriptFileAndAddToScriptReference(sriptReference);
+                    fetchScriptFileAndAddToScriptReference(scriptReference);
+                    filterIgnoredLinesInScript(scriptReference);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -103,8 +104,8 @@ public class ReportTemplateManager {
         return result.toList();
     }
 
-    private class ScriptReferenceList {
-        private List<ScriptReference> scriptReferenceList = new ArrayList<>();
+    private static class ScriptReferenceList {
+        private final List<ScriptReference> scriptReferenceList = new ArrayList<>();
 
         public void add(ScriptReference scriptReference) {
             if (scriptReference != null) {
@@ -135,6 +136,25 @@ public class ReportTemplateManager {
 
     private String fetchScript(Path scriptPath) throws IOException {
         return new String(readAllBytes(scriptPath), StandardCharsets.UTF_8);
+    }
+
+    private void filterIgnoredLinesInScript(ScriptReference scriptReference){
+        if (scriptReference != null && scriptReference.getScript() != null && scriptReference.getScript().getValue() != null){
+            Script script = scriptReference.getScript();
+            script.setValue(filterIgnoredLinesInScript(script.getValue()));
+        }
+    }
+
+    private String filterIgnoredLinesInScript(String script) {
+        StringBuilder result = new StringBuilder();
+        Arrays.stream(script.split("\n"))
+                .filter(this::isNotIgnoredLine).map(line -> line.concat("\n")).forEach(result::append);
+        return result.toString();
+    }
+
+    private boolean isNotIgnoredLine(String line) {
+        return !Arrays.stream(ReporterConst.IGNORE_LINE_IN_SCRIPT_TOKENS)
+                .anyMatch(stringArray -> Arrays.stream(stringArray).allMatch(line::contains));
     }
 
     public ReportTemplate fetchTemplateAndGenerateCustomTemplateId(String template) throws IOException {
