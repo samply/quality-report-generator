@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.1.7 - 2023-10-2]
 ### Changed
 - Rename FHIR_QUERY to FHIR_PATH
-
+- Better error management in report generation
 
 ## [1.1.6 - 2023-10-2]
 ### Changed

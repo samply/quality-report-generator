@@ -8,6 +8,7 @@ import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.utils.FileUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.epoll.EpollChannelOption;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -93,9 +94,9 @@ public class ExporterClient {
     }
 
     public void fetchExportFiles(Consumer<String> exportFilePathConsumer,
-                                 ReportTemplate template)
+                                 ReportTemplate template, Runnable finalizerIfError)
             throws ExporterClientException {
-        RequestResponseEntity requestResponseEntity = null;
+        RequestResponseEntity requestResponseEntity;
         if (template.getExporter() == null || template.getExporter().getExportUrl() == null) {
             logger.info("Sending request to exporter...");
             Exporter exporter = fetchExporter(template);
@@ -111,7 +112,7 @@ public class ExporterClient {
                                     .build())
                     .header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey)
                     .header(ReporterConst.IS_INTERNAL_REQUEST, isExporterInSameServer.toString());
-            if (exporter.getTemplate() != null && exporter.getTemplate().trim().length() > 0) {
+            if (exporter.getTemplate() != null && exporter.getTemplate().trim().isEmpty()) {
                 requestBodySpec.contentType(MediaType.APPLICATION_XML);
                 requestBodySpec.bodyValue(exporter.getTemplate());
             }
@@ -120,7 +121,7 @@ public class ExporterClient {
         } else {
             requestResponseEntity = new RequestResponseEntity(template.getExporter().getExportUrl());
         }
-        fetchExportFiles(requestResponseEntity, exportFilePathConsumer);
+        fetchExportFiles(requestResponseEntity, exportFilePathConsumer, finalizerIfError);
     }
 
     private Exporter fetchExporter(ReportTemplate template) {
@@ -145,14 +146,22 @@ public class ExporterClient {
                 ? templateFunction.apply(template.getExporter()) : defaultValue;
     }
 
-    private void fetchExportFiles(RequestResponseEntity requestResponseEntity,
-                                  Consumer<String> exportFilePathConsumer) throws ExporterClientException {
+    private void fetchExportFiles(RequestResponseEntity requestResponseEntity, Consumer<String> exportFilePathConsumer,
+                                  Runnable finalizerIfError) throws ExporterClientException {
         try {
             AtomicReference<String> filePath = new AtomicReference<>();
-            fetchExportFiles(requestResponseEntity.responseUrl(), filePath).subscribe(fileBytes -> {
-                copyInputStreamToFilePath(new ByteArrayInputStream(fileBytes), filePath.get());
-                exportFilePathConsumer.accept(filePath.get());
-            });
+            fetchExportFiles(requestResponseEntity.responseUrl(), filePath)
+                    .doOnError(throwable -> {
+                        throw new RuntimeException(throwable);
+                    })
+                    .subscribe(fileBytes -> {
+                        copyInputStreamToFilePath(new ByteArrayInputStream(fileBytes), filePath.get());
+                        exportFilePathConsumer.accept(filePath.get());
+                    }, throwable -> {
+                        logger.error(ExceptionUtils.getStackTrace(throwable));
+                        finalizerIfError.run();
+                    });
+
         } catch (RuntimeException e) {
             throw new ExporterClientException(e);
         }
@@ -186,20 +195,24 @@ public class ExporterClient {
     }
 
     private boolean shouldRetry(Throwable throwable, AtomicInteger counter) {
-        if (throwable instanceof WebClientResponseException) {
+        if (throwable instanceof WebClientResponseException responseException) {
             logger.info("Fetching export... (Attempt: " + counter.getAndIncrement() + ")");
-            WebClientResponseException responseException = (WebClientResponseException) throwable;
             HttpStatusCode statusCode = responseException.getStatusCode();
             // Retry if the status code is not 200 (indicating an error)
-            return statusCode != HttpStatus.OK;
+            return statusCode != HttpStatus.OK && isQueryStillRunning();
         }
         return false; // Do not retry for other types of exceptions
+    }
+
+    private boolean isQueryStillRunning() {
+        //TODO
+        return true;
     }
 
     private String fetchFilename(ClientResponse clientResponse) {
         List<String> header = clientResponse.headers()
                 .header(ReporterConst.HTTP_HEADER_CONTENT_DISPOSITION);
-        return (header.size() > 0) ? fetchFilenameFromHeader(header.get(0))
+        return (!header.isEmpty()) ? fetchFilenameFromHeader(header.get(0))
                 : FileUtils.fetchRandomFilename(ReporterConst.DEFAULT_EXPORTER_FILE_EXTENSION);
 
     }
@@ -229,7 +242,7 @@ public class ExporterClient {
         return this.webClient.get().uri(uriBuilder -> {
                     uriBuilder.path(ReporterConst.EXPORTER_LOGS)
                             .queryParam(ReporterConst.EXPORTER_LOGS_SIZE, numberOfLines);
-                    if (lastLine != null && lastLine.length() > 0) {
+                    if (lastLine != null && !lastLine.isEmpty()) {
                         uriBuilder.queryParam(ReporterConst.EXPORTER_LOGS_LAST_LINE, lastLine);
                     }
                     return uriBuilder.build();
