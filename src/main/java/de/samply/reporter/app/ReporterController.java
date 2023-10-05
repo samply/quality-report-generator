@@ -185,8 +185,11 @@ public class ReporterController {
         if (reportMetaInfo.isEmpty()) {
             return ResponseEntity.ok(ReportStatus.NOT_FOUND);
         }
-        if (!reportMetaInfo.get().path().toFile().exists()) {
+        if (reportGenerator.isReportRunning(reportMetaInfo.get())) {
             return ResponseEntity.ok(ReportStatus.RUNNING);
+        }
+        if (!reportMetaInfo.get().path().toFile().exists()) {
+            return ResponseEntity.ok(ReportStatus.ERROR);
         }
         return ResponseEntity.ok(ReportStatus.OK);
     }
