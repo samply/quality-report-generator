@@ -144,6 +144,13 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <!--https://www.baeldung.com/spring-boot-dependency -->
+                <!-- Two jar files are generated: -->
+                <!-- 1. reporter-XXX.jar: Java library used as dependency in dktk-reporter -->
+                <!-- 2. reporter-XXX-exec.jar: Spring Boot Application -->
+                <configuration>
+                    <classifier>exec</classifier>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
