@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.1.7 - 2023-10-9]
+### Added
+- File Path in scripts
+- Ignore lines in script
+- Two jar files (dependency + Spring Boot)
+
+### Changed
+- Rename FHIR_QUERY to FHIR_PATH
+- Better error management in report generation
+
 ## [1.1.6 - 2023-10-2]
 ### Changed
 - Move back to https://oss.sonatype.org/
