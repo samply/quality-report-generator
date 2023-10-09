@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Fetch script file for column scripts
 
+### Changed
+- Remove dktk reports (moved to dktk-reporter)
+
 ## [1.1.7 - 2023-10-9]
 ### Added
 - File Path in scripts
