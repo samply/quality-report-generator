@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [1.1.8 - 2023-10-9]
+### Fixed
+- Fetch script file for column scripts
+
+### Changed
+- Remove dktk reports (moved to dktk-reporter)
 
 ## [1.1.7 - 2023-10-9]
 ### Added

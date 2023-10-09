@@ -99,6 +99,8 @@ public class ReportTemplateManager {
         result.add(template.getInitScript());
         template.getSheetTemplates().forEach(sheetTemplate -> {
             sheetTemplate.getFormatScripts().forEach(result::add);
+            sheetTemplate.getColumnTemplates().stream().map(ColumnTemplate::getValueFormatScript).forEach(result::add);
+            sheetTemplate.getColumnTemplates().stream().map(ColumnTemplate::getHeaderFormatScript).forEach(result::add);
             result.add(sheetTemplate.getValuesScript());
         });
         return result.toList();
