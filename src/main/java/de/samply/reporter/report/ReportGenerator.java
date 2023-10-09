@@ -86,13 +86,18 @@ public class ReportGenerator {
             throws ReportGeneratorException {
         try {
             runningReportsManager.addRunningReportId(reportMetaInfo.id());
-            exporterClient.fetchExportFiles(filePath -> generate(template, filePath, reportMetaInfo),
-                    template);
+            exporterClient.fetchExportFiles(filePath -> generate(template, filePath, reportMetaInfo), template,
+                    () -> finalizeReportGenerationAsFailed(reportMetaInfo));
         } catch (ExporterClientException | RuntimeException e) {
-            runningReportsManager.removeRunningReportId(reportMetaInfo.id());
-            BufferedLoggerFactory.clearBuffer();
             throw new ReportGeneratorException(e);
+        } finally {
+            finalizeReportGenerationAsFailed(reportMetaInfo);
         }
+    }
+
+    private void finalizeReportGenerationAsFailed(ReportMetaInfo reportMetaInfo) {
+        runningReportsManager.removeRunningReportId(reportMetaInfo.id());
+        BufferedLoggerFactory.clearBuffer();
     }
 
     private void generate(ReportTemplate template, String filePath, ReportMetaInfo reportMetaInfo) {
@@ -352,4 +357,7 @@ public class ReportGenerator {
         }
     }
 
+    public boolean isReportRunning(ReportMetaInfo reportMetaInfo) {
+        return runningReportsManager.isReportIdRunning(reportMetaInfo.id());
+    }
 }

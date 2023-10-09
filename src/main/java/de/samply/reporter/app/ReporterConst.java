@@ -97,7 +97,7 @@ public class ReporterConst {
     public final static String EXPORTER_TEMPLATE_ID_SV =
             HEAD_SV + EXPORTER_TEMPLATE_ID + ":ccp-qb" + BOTTOM_SV;
     public final static String EXPORTER_QUERY_FORMAT_SV =
-            HEAD_SV + EXPORTER_QUERY_FORMAT + ":FHIR_QUERY" + BOTTOM_SV;
+            HEAD_SV + EXPORTER_QUERY_FORMAT + ":FHIR_PATH" + BOTTOM_SV;
     public final static String EXPORTER_OUTPUT_FORMAT_SV =
             HEAD_SV + EXPORTER_OUTPUT_FORMAT + ":CSV" + BOTTOM_SV;
     public final static String TEMP_FILES_DIRECTORY_SV =
@@ -168,5 +168,9 @@ public class ReporterConst {
     public final static int BUFFERED_LOGGER_SIZE = 1000;
     public final static String EXPORTER = "exporter";
     public final static String REPORTER = "reporter";
+    public final static String[][] IGNORE_LINE_IN_SCRIPT_TOKENS = {
+            {"@ignore"},
+            {"<%@", "page", "import"}
+    };
 
 }

@@ -13,28 +13,33 @@ public class ScriptParser {
   }
 
   public static String readTemplateAndParseScripts(String template) {
-    AtomicReference<String> result = new AtomicReference<>(template);
-    Arrays.stream(ScriptFramework.values()).forEach(scriptFramework ->
-        result.set(result.get()
-            .replace(scriptFramework.getStartTag(),
-                "<script framework=\"" + scriptFramework.getFramework() + "\"><![CDATA[")
-            .replace(scriptFramework.getEndTag(), "]]></script>")
-        ));
-    return replaceExporterTemplate(result.get());
+    template = prepareTemplateForEmbeddedScripts(template);
+    return replaceExporterTemplate(template);
   }
 
-  private static String replaceExporterTemplate(String qualityReportTemplate) {
-    if (qualityReportTemplate.contains("</exporter>")) {
-      int index1 = qualityReportTemplate.indexOf("<exporter");
-      int index2 = qualityReportTemplate.substring(index1).indexOf(">");
-      int index3 = qualityReportTemplate.indexOf("</exporter>");
-      qualityReportTemplate = qualityReportTemplate.substring(0, index1 + index2 + 1)
+  private static String prepareTemplateForEmbeddedScripts (String template){
+    AtomicReference<String> result = new AtomicReference<>(template);
+    Arrays.stream(ScriptFramework.values()).forEach(scriptFramework ->
+            result.set(result.get()
+                    .replace(scriptFramework.getStartTag(),
+                            "<script framework=\"" + scriptFramework.getFramework() + "\"><![CDATA[")
+                    .replace(scriptFramework.getEndTag(), "]]></script>")
+            ));
+    return result.get();
+  }
+
+  private static String replaceExporterTemplate(String template) {
+    if (template.contains("</exporter>")) {
+      int index1 = template.indexOf("<exporter");
+      int index2 = template.substring(index1).indexOf(">");
+      int index3 = template.indexOf("</exporter>");
+      template = template.substring(0, index1 + index2 + 1)
           + "<![CDATA["
-          + qualityReportTemplate.substring(index1 + index2 + 1, index3)
+          + template.substring(index1 + index2 + 1, index3)
           + "]]>"
-          + qualityReportTemplate.substring(index3);
+          + template.substring(index3);
     }
-    return qualityReportTemplate;
+    return template;
   }
 
 }

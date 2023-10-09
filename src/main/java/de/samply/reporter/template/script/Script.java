@@ -10,6 +10,10 @@ public class Script {
   @JsonProperty(value = "framework")
   private String framework;
 
+  @JacksonXmlProperty(isAttribute = true, localName = "file-path")
+  @JsonProperty(value = "file-path")
+  private String filePath;
+
   @JacksonXmlText
   private String value;
 
@@ -27,6 +31,14 @@ public class Script {
 
   public void setValue(String value) {
     this.value = value;
+  }
+
+  public String getFilePath() {
+    return filePath;
+  }
+
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
   }
 
 }
