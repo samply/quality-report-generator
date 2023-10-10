@@ -87,15 +87,14 @@ public class ReportGenerator {
         try {
             runningReportsManager.addRunningReportId(reportMetaInfo.id());
             exporterClient.fetchExportFiles(filePath -> generate(template, filePath, reportMetaInfo), template,
-                    () -> finalizeReportGenerationAsFailed(reportMetaInfo));
+                    () -> finalizeReportGeneration(reportMetaInfo));
         } catch (ExporterClientException | RuntimeException e) {
+            finalizeReportGeneration(reportMetaInfo);
             throw new ReportGeneratorException(e);
-        } finally {
-            finalizeReportGenerationAsFailed(reportMetaInfo);
         }
     }
 
-    private void finalizeReportGenerationAsFailed(ReportMetaInfo reportMetaInfo) {
+    private void finalizeReportGeneration(ReportMetaInfo reportMetaInfo) {
         runningReportsManager.removeRunningReportId(reportMetaInfo.id());
         BufferedLoggerFactory.clearBuffer();
     }

@@ -94,7 +94,7 @@ public class ExporterClient {
     }
 
     public void fetchExportFiles(Consumer<String> exportFilePathConsumer,
-                                 ReportTemplate template, Runnable finalizerIfError)
+                                 ReportTemplate template, Runnable finalizer)
             throws ExporterClientException {
         RequestResponseEntity requestResponseEntity;
         if (template.getExporter() == null || template.getExporter().getExportUrl() == null) {
@@ -121,7 +121,7 @@ public class ExporterClient {
         } else {
             requestResponseEntity = new RequestResponseEntity(template.getExporter().getExportUrl());
         }
-        fetchExportFiles(requestResponseEntity, exportFilePathConsumer, finalizerIfError);
+        fetchExportFiles(requestResponseEntity, exportFilePathConsumer, finalizer);
     }
 
     private Exporter fetchExporter(ReportTemplate template) {
@@ -147,7 +147,7 @@ public class ExporterClient {
     }
 
     private void fetchExportFiles(RequestResponseEntity requestResponseEntity, Consumer<String> exportFilePathConsumer,
-                                  Runnable finalizerIfError) throws ExporterClientException {
+                                  Runnable finalizer) throws ExporterClientException {
         try {
             AtomicReference<String> filePath = new AtomicReference<>();
             fetchExportFiles(requestResponseEntity.responseUrl(), filePath)
@@ -157,12 +157,14 @@ public class ExporterClient {
                     .subscribe(fileBytes -> {
                         copyInputStreamToFilePath(new ByteArrayInputStream(fileBytes), filePath.get());
                         exportFilePathConsumer.accept(filePath.get());
+                        finalizer.run();
                     }, throwable -> {
                         logger.error(ExceptionUtils.getStackTrace(throwable));
-                        finalizerIfError.run();
+                        finalizer.run();
                     });
 
         } catch (RuntimeException e) {
+            finalizer.run();
             throw new ExporterClientException(e);
         }
     }
