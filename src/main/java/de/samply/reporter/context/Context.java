@@ -116,8 +116,8 @@ public class Context {
     }
 
     public void applyToRecords(Path sourcePath, Consumer<CSVRecord> recordConsumer) {
-        try (FileReader fileReader = new FileReader(
-                sourcePath.toFile()); BufferedReader bufferedReader = new BufferedReader(fileReader)) {
+        try (FileReader fileReader = new FileReader(sourcePath.toFile(), csvConfig.charset());
+             BufferedReader bufferedReader = new BufferedReader(fileReader)) {
             applyToRecords(bufferedReader, recordConsumer);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -139,7 +139,7 @@ public class Context {
     }
 
     public boolean hasOnlyHeaders(Path path) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile(), csvConfig.charset()))) {
             int lineCount = 0;
             while (reader.readLine() != null) {
                 lineCount++;
@@ -153,7 +153,7 @@ public class Context {
 
     public List<String> fetchHeaders(Path path) throws IOException {
         String[] result = {};
-        try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile()))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(path.toFile(), csvConfig.charset()))) {
             String line = reader.readLine();
             if (line != null && line.trim().length() > 0) {
                 result = line.split(csvConfig.delimiter());

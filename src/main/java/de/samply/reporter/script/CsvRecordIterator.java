@@ -20,7 +20,7 @@ public class CsvRecordIterator implements Iterator<CSVRecord> {
 
   public CsvRecordIterator(Path sourcePath, CsvConfig csvConfig) throws ContextException {
     try {
-      fileReader = new FileReader(sourcePath.toFile());
+      fileReader = new FileReader(sourcePath.toFile(), csvConfig.charset());
       bufferedReader = new BufferedReader(fileReader);
       csvParser = createCsvParser(bufferedReader, csvConfig);
       iterator = csvParser.iterator();
