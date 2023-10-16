@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [1.1.9 - 2023-10-9]
 ### Fixed
 - Finalize report generation correctly
+- Read files with configuration charset
 
 ## [1.1.8 - 2023-10-9]
 ### Fixed
