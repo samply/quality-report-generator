@@ -97,7 +97,7 @@ public class ReporterConst {
     public final static String EXPORTER_TEMPLATE_ID_SV =
             HEAD_SV + EXPORTER_TEMPLATE_ID + ":ccp-qb" + BOTTOM_SV;
     public final static String EXPORTER_QUERY_FORMAT_SV =
-            HEAD_SV + EXPORTER_QUERY_FORMAT + ":FHIR_PATH" + BOTTOM_SV;
+            HEAD_SV + EXPORTER_QUERY_FORMAT + ":FHIR_SEARCH" + BOTTOM_SV;
     public final static String EXPORTER_OUTPUT_FORMAT_SV =
             HEAD_SV + EXPORTER_OUTPUT_FORMAT + ":CSV" + BOTTOM_SV;
     public final static String TEMP_FILES_DIRECTORY_SV =
