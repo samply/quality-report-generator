@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Read files with configuration charset
 - Write files with configuration charset
 
+### Added
+- Expiration date in hours
+
 ### Changed
 - FHIR_PATH to FHIR_SEARCH
 

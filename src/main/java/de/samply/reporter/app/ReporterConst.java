@@ -31,6 +31,7 @@ public class ReporterConst {
     public static final String LOGS_LAST_LINE_EXPORTER = "logs-last-line-exporter";
     public static final String REPORTS_LIST_PAGE_SIZE = "page-size";
     public static final String REPORTS_LIST_PAGE = "page";
+    public static final String HOURS_UNTIL_EXPORT_EXPIRATION = "export-expiration-in-hours";
 
 
     // Exporter Variables
@@ -42,6 +43,7 @@ public class ReporterConst {
     public final static String EXPORTER_REQUEST_PARAM_QUERY_FORMAT = "query-format";
     public final static String EXPORTER_REQUEST_PARAM_TEMPLATE_ID = "template-id";
     public final static String EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT = "output-format";
+    public static final String EXPORTER_REQUEST_PARAM_QUERY_EXPIRATION_DATE = "query-expiration-date";
     public final static String HTTP_HEADER_API_KEY = "x-api-key";
     public final static String IS_INTERNAL_REQUEST = "internal-request";
 
@@ -55,6 +57,7 @@ public class ReporterConst {
     public final static String EXPORTER_QUERY_FORMAT = "EXPORTER_QUERY_FORMAT";
     public final static String EXPORTER_TEMPLATE_ID = "EXPORTER_TEMPLATE_ID";
     public final static String EXPORTER_OUTPUT_FORMAT = "EXPORTER_OUTPUT_FORMAT";
+    public final static String EXPORTER_HOURS_UNTIL_EXPIRATION = "EXPORTER_HOURS_UNTIL_EXPIRATION";
     public final static String TEMP_FILES_DIRECTORY = "TEMP_FILES_DIRECTORY";
     public final static String REPORTS_DIRECTORY = "REPORTS_DIRECTORY";
     public final static String MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT = "MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT";
@@ -100,6 +103,8 @@ public class ReporterConst {
             HEAD_SV + EXPORTER_QUERY_FORMAT + ":FHIR_SEARCH" + BOTTOM_SV;
     public final static String EXPORTER_OUTPUT_FORMAT_SV =
             HEAD_SV + EXPORTER_OUTPUT_FORMAT + ":CSV" + BOTTOM_SV;
+    public final static String EXPORTER_HOURS_UNTIL_EXPIRATION_SV =
+            HEAD_SV + EXPORTER_HOURS_UNTIL_EXPIRATION + ":48" + BOTTOM_SV;
     public final static String TEMP_FILES_DIRECTORY_SV =
             HEAD_SV + TEMP_FILES_DIRECTORY + ":./temp-files" + BOTTOM_SV;
     public final static String REPORTS_DIRECTORY_SV =

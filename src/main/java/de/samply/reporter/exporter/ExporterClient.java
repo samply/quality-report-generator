@@ -5,6 +5,7 @@ import de.samply.reporter.logger.BufferedLoggerFactory;
 import de.samply.reporter.logger.Logger;
 import de.samply.reporter.template.Exporter;
 import de.samply.reporter.template.ReportTemplate;
+import de.samply.reporter.utils.ExportExpirationDate;
 import de.samply.reporter.utils.FileUtils;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.epoll.EpollChannelOption;
@@ -53,6 +54,7 @@ public class ExporterClient {
     private final int timeInSecondsToWaitBetweenAttemptsToGetExport;
     private final int webClientBufferSizeInBytes;
     private final Boolean isExporterInSameServer;
+    private final ExportExpirationDate exportExpirationDate;
 
     public ExporterClient(@Value(ReporterConst.EXPORTER_URL_SV) String exporterUrl,
                           @Value(ReporterConst.EXPORTER_API_KEY_SV) String exporterApiKey,
@@ -69,7 +71,9 @@ public class ExporterClient {
                           @Value(ReporterConst.WEBCLIENT_TCP_KEEP_IDLE_IN_SECONDS_SV) Integer webClientTcpKeepIdleInSeconds,
                           @Value(ReporterConst.WEBCLIENT_TCP_KEEP_INTERVAL_IN_SECONDS_SV) Integer webClientTcpKeepIntervalInSeconds,
                           @Value(ReporterConst.WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES_SV) Integer webClientTcpKeepConnetionNumberOfTries,
-                          @Value(ReporterConst.IS_EXPORTER_IN_SAME_SERVER_SV) Boolean isExporterInSameServer) {
+                          @Value(ReporterConst.IS_EXPORTER_IN_SAME_SERVER_SV) Boolean isExporterInSameServer,
+                          ExportExpirationDate exportExpirationDate) {
+        this.exportExpirationDate = exportExpirationDate;
         this.isExporterInSameServer = isExporterInSameServer;
         this.webClient = WebClient.builder()
                 .clientConnector(new ReactorClientHttpConnector(
@@ -109,6 +113,8 @@ public class ExporterClient {
                                             Optional.ofNullable(exporter.getTemplateId()))
                                     .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
                                             exporter.getOutputFormat())
+                                    .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_EXPIRATION_DATE,
+                                            exportExpirationDate.calculateExportExpirationDate(template.getExporter().getExportExpirationInHours()))
                                     .build())
                     .header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey)
                     .header(ReporterConst.IS_INTERNAL_REQUEST, isExporterInSameServer.toString());
@@ -122,6 +128,10 @@ public class ExporterClient {
             requestResponseEntity = new RequestResponseEntity(template.getExporter().getExportUrl());
         }
         fetchExportFiles(requestResponseEntity, exportFilePathConsumer, finalizer);
+    }
+
+    private void fetchExportExpirationDate(int expirationDateInHours) {
+
     }
 
     private Exporter fetchExporter(ReportTemplate template) {

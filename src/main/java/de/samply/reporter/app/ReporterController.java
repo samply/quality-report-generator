@@ -73,6 +73,7 @@ public class ReporterController {
             @RequestParam(name = ReporterConst.EXPORT_URL, required = false) String exportUrl,
             @RequestHeader(name = "Content-Type", required = false) String contentType,
             @RequestHeader(name = ReporterConst.IS_INTERNAL_REQUEST, required = false) Boolean isInternalRequest,
+            @RequestHeader(name = ReporterConst.HOURS_UNTIL_EXPORT_EXPIRATION, required = false) Integer hoursUntilExportExpiration,
             @RequestBody(required = false) String template
     ) throws ReportGeneratorException, ReportMetaInfoManagerException, JsonProcessingException {
         ReportTemplate reportTemplate;
@@ -103,6 +104,7 @@ public class ReporterController {
                     exporter = new Exporter();
                     reportTemplate.setExporter(exporter);
                 }
+                exporter.setExportExpirationInHours(hoursUntilExportExpiration);
                 exporter.setExportUrl(exportUrl);
             }
         }
