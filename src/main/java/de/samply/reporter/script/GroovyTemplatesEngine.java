@@ -4,6 +4,7 @@ import de.samply.reporter.app.ReporterConst;
 import de.samply.reporter.context.CellContext;
 import de.samply.reporter.context.CellStyleContext;
 import de.samply.reporter.context.Context;
+import de.samply.reporter.context.CsvConfig;
 import de.samply.reporter.template.script.Script;
 import de.samply.reporter.template.script.ScriptFramework;
 import groovy.lang.Binding;
@@ -28,14 +29,14 @@ public class GroovyTemplatesEngine extends ScriptEngineImpl {
     ScriptResult result = super.generateRawResult(script, context);
     Binding binding = new Binding();
     binding.setVariable(ReporterConst.CONTEXT_VARIABLE, context);
-    generateResult(result, script, binding);
+    generateResult(result, script, binding, context.getCsvConfig());
     removeUnnecessaryEmptyLines(result, context.getCsvConfig());
     return result;
   }
 
-  private void generateResult(ScriptResult result, Script script, Binding binding)
+  private void generateResult(ScriptResult result, Script script, Binding binding, CsvConfig csvConfig)
       throws ScriptEngineException {
-    try (FileWriter fileWriter = new FileWriter(result.rawResult().toFile())) {
+    try (FileWriter fileWriter = new FileWriter(result.rawResult().toFile(), csvConfig.charset())) {
       generateResult(script, binding, fileWriter);
     } catch (IOException e) {
       throw new ScriptEngineException(e);

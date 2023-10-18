@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - Finalize report generation correctly
 - Read files with configuration charset
+- Write files with configuration charset
 
 ### Changed
 - FHIR_PATH to FHIR_SEARCH

@@ -49,7 +49,7 @@ public abstract class ScriptEngineImpl implements ScriptEngine {
 
   private void removeUnnecessaryEmptyLinesAndCopyToTempPath(Path originalPath, Path tempPath,
       CsvConfig csvConfig) throws ScriptEngineException {
-    try (PrintWriter printWriter = new PrintWriter(new FileWriter(tempPath.toFile()))) {
+    try (PrintWriter printWriter = new PrintWriter(new FileWriter(tempPath.toFile(), csvConfig.charset()))) {
       Files.readAllLines(originalPath).forEach(line -> {
         if (line.trim().length() > csvConfig.endOfLine().length()) {
           line = removeInitialSpaces(line);
