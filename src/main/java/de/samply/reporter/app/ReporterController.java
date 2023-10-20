@@ -71,6 +71,8 @@ public class ReporterController {
             HttpServletRequest httpServletRequest,
             @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID, required = false) String templateId,
             @RequestParam(name = ReporterConst.EXPORT_URL, required = false) String exportUrl,
+            @RequestParam(name = ReporterConst.DAYS_UNTIL_EXPORT_EXPIRATION, required = false) Integer daysUntilExportExpiration,
+            @RequestParam(name = ReporterConst.EXPIRES_EXPORT, required = false) Boolean expiresExport,
             @RequestHeader(name = "Content-Type", required = false) String contentType,
             @RequestHeader(name = ReporterConst.IS_INTERNAL_REQUEST, required = false) Boolean isInternalRequest,
             @RequestBody(required = false) String template
@@ -92,7 +94,7 @@ public class ReporterController {
                 return new ResponseEntity<>("No template nor template id provided", HttpStatus.BAD_REQUEST);
             }
             reportTemplate = reportTemplateManager.getQualityReportTemplate(templateId);
-            if (exportUrl != null) {
+            if (exportUrl != null || daysUntilExportExpiration != null || expiresExport != null) {
                 try {
                     reportTemplate = reportTemplate.clone();
                 } catch (CloneNotSupportedException e) {
@@ -103,7 +105,15 @@ public class ReporterController {
                     exporter = new Exporter();
                     reportTemplate.setExporter(exporter);
                 }
-                exporter.setExportUrl(exportUrl);
+                if (daysUntilExportExpiration != null) {
+                    exporter.setExportExpirationInDays(daysUntilExportExpiration);
+                }
+                if (expiresExport != null && expiresExport == false) {
+                    exporter.setExportExpirationInDays(ReporterConst.EXPORT_NOT_EXPIRES);
+                }
+                if (exportUrl != null) {
+                    exporter.setExportUrl(exportUrl);
+                }
             }
         }
         ReportMetaInfo reportMetaInfo = reportMetaInfoManager.createNewReportMetaInfo(reportTemplate);

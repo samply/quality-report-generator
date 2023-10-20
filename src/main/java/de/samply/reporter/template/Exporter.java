@@ -31,6 +31,12 @@ public class Exporter {
 
   private String outputFormat;
 
+  @JacksonXmlProperty(isAttribute = true, localName = "export-expiration-in-days")
+  @JsonProperty(value = "export-expiration-in-days")
+
+  private Integer exportExpirationInDays;
+
+
   @JacksonXmlText
   private String template;
 
@@ -81,6 +87,14 @@ public class Exporter {
 
   public void setExportUrl(String exportUrl) {
     this.exportUrl = exportUrl;
+  }
+
+  public Integer getExportExpirationInDays() {
+    return exportExpirationInDays;
+  }
+
+  public void setExportExpirationInDays(Integer exportExpirationInDays) {
+    this.exportExpirationInDays = exportExpirationInDays;
   }
 
 }
