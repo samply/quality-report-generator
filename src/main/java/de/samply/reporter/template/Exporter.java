@@ -31,10 +31,10 @@ public class Exporter {
 
   private String outputFormat;
 
-  @JacksonXmlProperty(isAttribute = true, localName = "export-expiration-in-hours")
-  @JsonProperty(value = "export-expiration-in-hours")
+  @JacksonXmlProperty(isAttribute = true, localName = "export-expiration-in-days")
+  @JsonProperty(value = "export-expiration-in-days")
 
-  private Integer exportExpirationInHours;
+  private Integer exportExpirationInDays;
 
 
   @JacksonXmlText
@@ -89,12 +89,12 @@ public class Exporter {
     this.exportUrl = exportUrl;
   }
 
-  public Integer getExportExpirationInHours() {
-    return exportExpirationInHours;
+  public Integer getExportExpirationInDays() {
+    return exportExpirationInDays;
   }
 
-  public void setExportExpirationInHours(Integer exportExpirationInHours) {
-    this.exportExpirationInHours = exportExpirationInHours;
+  public void setExportExpirationInDays(Integer exportExpirationInDays) {
+    this.exportExpirationInDays = exportExpirationInDays;
   }
 
 }

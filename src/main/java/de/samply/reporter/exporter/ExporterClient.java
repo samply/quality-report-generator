@@ -113,8 +113,8 @@ public class ExporterClient {
                                             Optional.ofNullable(exporter.getTemplateId()))
                                     .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
                                             exporter.getOutputFormat())
-                                    .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_EXPIRATION_DATE,
-                                            exportExpirationDate.calculateExportExpirationDate(template.getExporter().getExportExpirationInHours()))
+                                    .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_EXPIRATION_DATE,
+                                            exportExpirationDate.calculateExportExpirationDate(template.getExporter().getExportExpirationInDays()))
                                     .build())
                     .header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey)
                     .header(ReporterConst.IS_INTERNAL_REQUEST, isExporterInSameServer.toString());

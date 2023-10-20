@@ -6,23 +6,25 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Optional;
 
 @Component
 public class ExportExpirationDate {
 
     private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-    private final int defaultHoursToExpire;
+    private final int defaultDaysToExpire;
 
     public ExportExpirationDate(
-            @Value(ReporterConst.EXPORTER_HOURS_UNTIL_EXPIRATION_SV) Integer defaultHoursToExpire) {
-        this.defaultHoursToExpire = defaultHoursToExpire;
+            @Value(ReporterConst.EXPORTER_DAYS_UNTIL_EXPIRATION_SV) Integer defaultDaysToExpire) {
+        this.defaultDaysToExpire = defaultDaysToExpire;
     }
 
-    public String calculateExportExpirationDate(Integer hoursToExpire) {
-        if (hoursToExpire == null) {
-            hoursToExpire = defaultHoursToExpire;
+    public Optional<String> calculateExportExpirationDate(Integer daysToExpire) {
+        if (daysToExpire == null) {
+            daysToExpire = defaultDaysToExpire;
         }
-        return LocalDateTime.now().plusHours(hoursToExpire).format(formatter);
+        return (daysToExpire == ReporterConst.EXPORT_NOT_EXPIRES) ? Optional.empty() :
+                Optional.of(LocalDateTime.now().plusDays(daysToExpire).format(formatter));
     }
 
 }
