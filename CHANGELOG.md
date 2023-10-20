@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Added
 - Export expiration in days
+- Export contact id
 
 ### Changed
 - FHIR_PATH to FHIR_SEARCH
