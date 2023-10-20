@@ -45,6 +45,7 @@ public class ReporterConst {
     public final static String EXPORTER_REQUEST_PARAM_TEMPLATE_ID = "template-id";
     public final static String EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT = "output-format";
     public static final String EXPORTER_REQUEST_PARAM_QUERY_EXPIRATION_DATE = "query-expiration-date";
+    public final static String EXPORTER_REQUEST_PARAM_QUERY_CONTACT_ID = "query-contact-id";
     public final static String HTTP_HEADER_API_KEY = "x-api-key";
     public final static String IS_INTERNAL_REQUEST = "internal-request";
 
@@ -82,6 +83,7 @@ public class ReporterConst {
     public final static String IS_EXPORTER_IN_SAME_SERVER = "IS_EXPORTER_IN_SAME_SERVER";
     public final static String MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET = "MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET";
     public final static String CUSTOM_TEMPLATE_ID = "CUSTOM_TEMPLATE_ID";
+    public final static String EXPORTER_QUERY_CONTACT_ID = "EXPORTER_QUERY_CONTACT_ID";
 
 
     // Spring Values (SV)
@@ -152,6 +154,8 @@ public class ReporterConst {
             HEAD_SV + MAX_NUMBER_OF_ROWS_IN_EXCEL_SHEET + ":100000" + BOTTOM_SV;
     public final static String CUSTOM_TEMPLATE_ID_SV =
             HEAD_SV + CUSTOM_TEMPLATE_ID + ":custom-{TIMESTAMP}" + BOTTOM_SV;
+    public final static String EXPORTER_QUERY_CONTACT_ID_SV =
+            HEAD_SV + EXPORTER_QUERY_CONTACT_ID + ":reporter" + BOTTOM_SV;
 
 
     // Other variables:

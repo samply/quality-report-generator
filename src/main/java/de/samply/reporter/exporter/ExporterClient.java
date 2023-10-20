@@ -49,6 +49,7 @@ public class ExporterClient {
     private final String exporterQueryFormat;
     private final String exporterTemplateId;
     private final String exporterOutputFormat;
+    private final String exporterQueryContactId;
     private final String tempFilesDirectory;
     private final int maxNumberOfAttemptsToGetExport;
     private final int timeInSecondsToWaitBetweenAttemptsToGetExport;
@@ -62,6 +63,7 @@ public class ExporterClient {
                           @Value(ReporterConst.EXPORTER_QUERY_FORMAT_SV) String exporterQueryFormat,
                           @Value(ReporterConst.EXPORTER_TEMPLATE_ID_SV) String exporterTemplateId,
                           @Value(ReporterConst.EXPORTER_OUTPUT_FORMAT_SV) String exporterOutputFormat,
+                          @Value(ReporterConst.EXPORTER_QUERY_CONTACT_ID_SV) String exporterQueryContactId,
                           @Value(ReporterConst.TEMP_FILES_DIRECTORY_SV) String tempFilesDirectory,
                           @Value(ReporterConst.MAX_NUMBER_OF_ATTEMPTS_TO_GET_EXPORT_SV) Integer maxNumberOfAttemptsToGetExport,
                           @Value(ReporterConst.TIME_IN_SECONDS_TO_WAIT_BETWEEN_ATTEMPTS_TO_GET_EXPORT_SV) Integer timeInSecondsToWaitBetweenAttemptsToGetExport,
@@ -91,6 +93,7 @@ public class ExporterClient {
         this.exporterQueryFormat = exporterQueryFormat;
         this.exporterTemplateId = exporterTemplateId;
         this.exporterOutputFormat = exporterOutputFormat;
+        this.exporterQueryContactId = exporterQueryContactId;
         this.tempFilesDirectory = tempFilesDirectory;
         this.maxNumberOfAttemptsToGetExport = maxNumberOfAttemptsToGetExport;
         this.timeInSecondsToWaitBetweenAttemptsToGetExport = timeInSecondsToWaitBetweenAttemptsToGetExport;
@@ -113,6 +116,7 @@ public class ExporterClient {
                                             Optional.ofNullable(exporter.getTemplateId()))
                                     .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_OUTPUT_FORMAT,
                                             exporter.getOutputFormat())
+                                    .queryParam(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_CONTACT_ID, exporterQueryContactId)
                                     .queryParamIfPresent(ReporterConst.EXPORTER_REQUEST_PARAM_QUERY_EXPIRATION_DATE,
                                             exportExpirationDate.calculateExportExpirationDate(template.getExporter().getExportExpirationInDays()))
                                     .build())
