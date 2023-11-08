@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.1.9 - 2023-10-20]
+## [1.1.9 - 2023-11-08]
 ### Fixed
 - Finalize report generation correctly
 - Read files with configuration charset
@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Export expiration in days
 - Export contact id
+- Ignore template parameter
 
 ### Changed
 - FHIR_PATH to FHIR_SEARCH

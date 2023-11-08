@@ -19,6 +19,10 @@ public class ReportTemplate {
     @JsonProperty(value = "id")
     private String id;
 
+    @JacksonXmlProperty(isAttribute = true, localName = "ignore")
+    @JsonProperty(value = "ignore")
+    private Boolean ignore;
+
     @JacksonXmlProperty(isAttribute = true, localName = "filename")
     @JsonProperty(value = "filename")
     private String filename;
@@ -42,6 +46,14 @@ public class ReportTemplate {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public boolean getIgnore() {
+        return (ignore != null) ? ignore : false;
+    }
+
+    public void setIgnore(Boolean ignore) {
+        this.ignore = ignore;
     }
 
     public String getFilename() {

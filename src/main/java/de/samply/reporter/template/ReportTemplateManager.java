@@ -65,8 +65,10 @@ public class ReportTemplateManager {
 
     private void loadTemplateWithoutExceptionHandling(Path templatePath) throws IOException {
         ReportTemplate reportTemplate = fetchTemplate(templatePath);
-        idQualityReportTemplateMap.put(reportTemplate.getId(), reportTemplate);
-        idQualityReportTemplatePathMap.put(reportTemplate.getId(), templatePath);
+        if (!reportTemplate.getIgnore()) {
+            idQualityReportTemplateMap.put(reportTemplate.getId(), reportTemplate);
+            idQualityReportTemplatePathMap.put(reportTemplate.getId(), templatePath);
+        }
     }
 
     public ReportTemplate fetchTemplate(Path templatePath) throws IOException {
@@ -140,8 +142,8 @@ public class ReportTemplateManager {
         return new String(readAllBytes(scriptPath), StandardCharsets.UTF_8);
     }
 
-    private void filterIgnoredLinesInScript(ScriptReference scriptReference){
-        if (scriptReference != null && scriptReference.getScript() != null && scriptReference.getScript().getValue() != null){
+    private void filterIgnoredLinesInScript(ScriptReference scriptReference) {
+        if (scriptReference != null && scriptReference.getScript() != null && scriptReference.getScript().getValue() != null) {
             Script script = scriptReference.getScript();
             script.setValue(filterIgnoredLinesInScript(script.getValue()));
         }
