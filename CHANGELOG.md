@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Export expiration in days
 - Export contact id
 - Ignore template parameter
+- Tomcat max-http-header-size
 
 ### Changed
 - FHIR_PATH to FHIR_SEARCH
