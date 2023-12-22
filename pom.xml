@@ -43,6 +43,8 @@
         <commons-csv.version>1.10.0</commons-csv.version>
         <groovy-templates.version>4.0.12</groovy-templates.version>
         <guava.version>32.1.1-jre</guava.version>
+        <springdoc-openapi-starter-webmvc-ui.version>2.3.0</springdoc-openapi-starter-webmvc-ui.version>
+        <springdoc-openapi-common.version>1.7.0</springdoc-openapi-common.version>
     </properties>
 
     <dependencies>
@@ -72,6 +74,16 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>${springdoc-openapi-starter-webmvc-ui.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-common</artifactId>
+            <version>${springdoc-openapi-common.version}</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>

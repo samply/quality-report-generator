@@ -15,6 +15,10 @@ import de.samply.reporter.template.Exporter;
 import de.samply.reporter.template.ReportTemplate;
 import de.samply.reporter.template.ReportTemplateManager;
 import de.samply.reporter.utils.ProjectVersion;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -67,6 +71,12 @@ public class ReporterController {
     }
 
     @PostMapping(value = ReporterConst.GENERATE)
+    @Operation(summary = "Generate Report", description = "Generate a report based on the provided template or custom template string.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Report generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Bad request. Check request parameters."),
+            @ApiResponse(responseCode = "500", description = "Internal server error during report generation")
+    })
     public ResponseEntity<String> generate(
             HttpServletRequest httpServletRequest,
             @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID, required = false) String templateId,
@@ -152,6 +162,22 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.REPORT, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "Fetch Report", description = "Retrieves a report as an octet stream based on the provided report ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Report fetched successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Report not found"
+
+            ),
+            @ApiResponse(
+                    responseCode = "202",
+                    description = "Accepted. Report file not yet available"
+            )
+    })
     public ResponseEntity<InputStreamResource> fetchReport(
             @RequestParam(name = ReporterConst.REPORT_ID) String reportId
     ) throws ReportMetaInfoManagerException, FileNotFoundException {
@@ -178,8 +204,21 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.REPORTS_LIST)
+    @Operation(summary = "Fetch All Reports", description = "Retrieves a list of all available reports with optional pagination parameters."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Reports fetched successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error during report meta-information retrieval")
+    })
     public ResponseEntity fetchAllReports(
+            @Parameter(name = ReporterConst.REPORTS_LIST_PAGE, description = "The page number for pagination", required = false)
             @RequestParam(name = ReporterConst.REPORTS_LIST_PAGE, required = false) Integer page,
+            @Parameter(name = ReporterConst.REPORTS_LIST_PAGE_SIZE, description = "The number of items per page for pagination", required = false)
             @RequestParam(name = ReporterConst.REPORTS_LIST_PAGE_SIZE, required = false) Integer pageSize
     ) throws ReportMetaInfoManagerException {
         return ResponseEntity.ok().body((page != null && pageSize != null) ?
@@ -188,7 +227,22 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.REPORT_STATUS)
+    @Operation(summary = "Fetch Report Status", description = "Retrieves the status of a specific report based on the provided report ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Report status retrieved successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Report not found"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error during report status retrieval")
+    })
     public ResponseEntity<ReportStatus> fetchReportStatus(
+            @Parameter(name = ReporterConst.REPORT_ID, description = "The ID of the report for which the status is to be retrieved", required = true)
             @RequestParam(name = ReporterConst.REPORT_ID) String reportId
     ) throws ReportMetaInfoManagerException {
         Optional<ReportMetaInfo> reportMetaInfo = reportMetaInfoManager.fetchReportMetaInfo(reportId);
@@ -205,9 +259,19 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.LOGS)
+    @Operation(summary = "Fetch Logs", description = "Retrieves logs from the reporter and exporter components based on the specified parameters.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Logs fetched successfully"
+            )
+    })
     public ResponseEntity<Logs[]> fetchLogs(
+            @Parameter(name = ReporterConst.LOGS_SIZE, description = "The number of log lines to retrieve", required = true)
             @RequestParam(name = ReporterConst.LOGS_SIZE) int logsSize,
+            @Parameter(name = ReporterConst.LOGS_LAST_LINE_REPORTER, description = "Optional parameter specifying the last retrieved log line for the reporter component", required = false)
             @RequestParam(name = ReporterConst.LOGS_LAST_LINE_REPORTER, required = false) String logsLastLine,
+            @Parameter(name = ReporterConst.LOGS_LAST_LINE_EXPORTER, description = "Optional parameter specifying the last retrieved log line for the exporter component", required = false)
             @RequestParam(name = ReporterConst.LOGS_LAST_LINE_EXPORTER, required = false) String exporterLogsLastLine) {
         Logs reporterLogs = new Logs(ReporterConst.REPORTER, BufferedLoggerFactory.getLastLoggerLines(logsSize, logsLastLine));
         Logs exporterLogs = new Logs(ReporterConst.EXPORTER, exporterClient.fetchLogs(logsSize, exporterLogsLastLine));
@@ -216,12 +280,30 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.REPORT_TEMPLATE_IDS)
+    @Operation(summary = "Fetch Report Template IDs", description = "Retrieves an array of report template IDs.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Report template IDs fetched successfully"
+            )
+    })
     public ResponseEntity<String[]> fetchTemplateIds() {
         return ResponseEntity.ok().body(reportTemplateManager.getReportTemplateIds());
     }
 
     @GetMapping(value = ReporterConst.REPORT_TEMPLATE, produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "Fetch Report Template", description = "Retrieves a report template as an octet stream based on the provided report template ID.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Report template fetched successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Report template not found")
+    })
     public ResponseEntity<InputStreamResource> fetchReporTemplate(
+            @Parameter(name = ReporterConst.REPORT_TEMPLATE_ID, description = "The ID of the report template to be fetched", required = true)
             @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID) String reportTemplateId
     ) throws FileNotFoundException {
         Optional<Path> reportTemplatePath = reportTemplateManager.getReportTemplatePath(reportTemplateId);
@@ -232,6 +314,16 @@ public class ReporterController {
     }
 
     @GetMapping(value = ReporterConst.RUNNING_REPORTS)
+    @Operation(summary = "Fetch Running Reports", description = "Retrieves a list of running reports.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Running reports fetched successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error during running report meta-information retrieval")
+    })
     public ResponseEntity fetchRunningReports() throws ReportMetaInfoManagerException {
         return ResponseEntity.ok().body(reportMetaInfoManager.fetchRunningReportMetaInfos());
     }
