@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClient.RequestBodySpec;
@@ -122,7 +123,7 @@ public class ExporterClient {
                                     .build())
                     .header(ReporterConst.HTTP_HEADER_API_KEY, exporterApiKey)
                     .header(ReporterConst.IS_INTERNAL_REQUEST, isExporterInSameServer.toString());
-            if (exporter.getTemplate() != null && exporter.getTemplate().trim().isEmpty()) {
+            if (StringUtils.hasText(exporter.getTemplate())) {
                 requestBodySpec.contentType(MediaType.APPLICATION_XML);
                 requestBodySpec.bodyValue(exporter.getTemplate());
             }
