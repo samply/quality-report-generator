@@ -206,7 +206,7 @@ public class ReporterController {
             )
     })
     public ResponseEntity<InputStreamResource> fetchReport(
-
+            @Parameter(description = "The ID of the report.")
             @RequestParam(name = ReporterConst.REPORT_ID) String reportId
     ) throws ReportMetaInfoManagerException, FileNotFoundException {
         Optional<ReportMetaInfo> reportMetaInfo = reportMetaInfoManager.fetchReportMetaInfo(reportId);
