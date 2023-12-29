@@ -79,10 +79,15 @@ public class ReporterController {
     })
     public ResponseEntity<String> generate(
             HttpServletRequest httpServletRequest,
+            @Parameter(description = "The ID of the report template.")
             @RequestParam(name = ReporterConst.REPORT_TEMPLATE_ID, required = false) String templateId,
+            @Parameter(description = "The export URL for the report.")
             @RequestParam(name = ReporterConst.EXPORT_URL, required = false) String exportUrl,
+            @Parameter(description = "The content type of the request.")
             @RequestHeader(name = "Content-Type", required = false) String contentType,
+            @Parameter(description = "Flag indicating whether the request is internal.")
             @RequestHeader(name = ReporterConst.IS_INTERNAL_REQUEST, required = false) Boolean isInternalRequest,
+            @Parameter(description = "The template for report generation.")
             @RequestBody(required = false) String template
     ) throws ReportGeneratorException, ReportMetaInfoManagerException, JsonProcessingException {
         ReportTemplate reportTemplate;
@@ -201,6 +206,7 @@ public class ReporterController {
             )
     })
     public ResponseEntity<InputStreamResource> fetchReport(
+            @Parameter(description = "The ID of the report.")
             @RequestParam(name = ReporterConst.REPORT_ID) String reportId
     ) throws ReportMetaInfoManagerException, FileNotFoundException {
         Optional<ReportMetaInfo> reportMetaInfo = reportMetaInfoManager.fetchReportMetaInfo(reportId);
