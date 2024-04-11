@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.1.9 - 2023-12-23]
+## [1.1.9 - 2023-04-11]
 ### Fixed
 - Finalize report generation correctly
 - Read files with configuration charset
@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Ignore template parameter
 - Tomcat max-http-header-size
 - Open API docs
+- CreateWebclient in ExporterClient
 
 ### Changed
 - FHIR_PATH to FHIR_SEARCH

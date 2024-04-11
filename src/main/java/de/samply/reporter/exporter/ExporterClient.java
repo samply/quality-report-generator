@@ -56,6 +56,11 @@ public class ExporterClient {
     private final int timeInSecondsToWaitBetweenAttemptsToGetExport;
     private final int webClientBufferSizeInBytes;
     private final Boolean isExporterInSameServer;
+    private final Integer webClientRequestTimeoutInSeconds;
+    private final Integer webClientConnectionTimeoutInSeconds;
+    private final Integer webClientTcpKeepIdleInSeconds;
+    private final Integer webClientTcpKeepIntervalInSeconds;
+    private final Integer webClientTcpKeepConnetionNumberOfTries;
     private final ExportExpirationDate exportExpirationDate;
 
     public ExporterClient(@Value(ReporterConst.EXPORTER_URL_SV) String exporterUrl,
@@ -76,19 +81,13 @@ public class ExporterClient {
                           @Value(ReporterConst.WEBCLIENT_TCP_KEEP_CONNECTION_NUMBER_OF_TRIES_SV) Integer webClientTcpKeepConnetionNumberOfTries,
                           @Value(ReporterConst.IS_EXPORTER_IN_SAME_SERVER_SV) Boolean isExporterInSameServer,
                           ExportExpirationDate exportExpirationDate) {
+        this.webClientRequestTimeoutInSeconds = webClientRequestTimeoutInSeconds;
+        this.webClientConnectionTimeoutInSeconds = webClientConnectionTimeoutInSeconds;
+        this.webClientTcpKeepIdleInSeconds = webClientTcpKeepIdleInSeconds;
+        this.webClientTcpKeepIntervalInSeconds = webClientTcpKeepIntervalInSeconds;
+        this.webClientTcpKeepConnetionNumberOfTries = webClientTcpKeepConnetionNumberOfTries;
         this.exportExpirationDate = exportExpirationDate;
         this.isExporterInSameServer = isExporterInSameServer;
-        this.webClient = WebClient.builder()
-                .clientConnector(new ReactorClientHttpConnector(
-                        HttpClient.create()
-                                .responseTimeout(Duration.ofSeconds(webClientRequestTimeoutInSeconds))
-                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, webClientConnectionTimeoutInSeconds * 1000)
-                                .option(ChannelOption.SO_KEEPALIVE, true)
-                                .option(EpollChannelOption.TCP_KEEPIDLE, webClientTcpKeepIdleInSeconds)
-                                .option(EpollChannelOption.TCP_KEEPINTVL, webClientTcpKeepIntervalInSeconds)
-                                .option(EpollChannelOption.TCP_KEEPCNT, webClientTcpKeepConnetionNumberOfTries)
-                ))
-                .baseUrl(exporterUrl).build();
         this.exporterApiKey = exporterApiKey;
         this.exporterQuery = exporterQuery;
         this.exporterQueryFormat = exporterQueryFormat;
@@ -99,6 +98,22 @@ public class ExporterClient {
         this.maxNumberOfAttemptsToGetExport = maxNumberOfAttemptsToGetExport;
         this.timeInSecondsToWaitBetweenAttemptsToGetExport = timeInSecondsToWaitBetweenAttemptsToGetExport;
         this.webClientBufferSizeInBytes = webClientBufferSizeInBytes;
+        this.webClient = createWebClient(exporterUrl);
+    }
+
+    private WebClient createWebClient(String baseUrl) {
+        return WebClient.builder()
+                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(webClientBufferSizeInBytes))
+                .clientConnector(new ReactorClientHttpConnector(
+                        HttpClient.create()
+                                .responseTimeout(Duration.ofSeconds(webClientRequestTimeoutInSeconds))
+                                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, webClientConnectionTimeoutInSeconds * 1000)
+                                .option(ChannelOption.SO_KEEPALIVE, true)
+                                .option(EpollChannelOption.TCP_KEEPIDLE, webClientTcpKeepIdleInSeconds)
+                                .option(EpollChannelOption.TCP_KEEPINTVL, webClientTcpKeepIntervalInSeconds)
+                                .option(EpollChannelOption.TCP_KEEPCNT, webClientTcpKeepConnetionNumberOfTries)
+                ))
+                .baseUrl(baseUrl).build();
     }
 
     public void fetchExportFiles(Consumer<String> exportFilePathConsumer,
@@ -188,9 +203,7 @@ public class ExporterClient {
         /*logger.info("Fetching export... (Attempt: " + (
                 maxNumberOfAttemptsToGetExport - counter.get() + 1) + ")");*/
         AtomicInteger counter = new AtomicInteger(1);
-        return WebClient.builder()
-                .codecs(codecs -> codecs.defaultCodecs().maxInMemorySize(webClientBufferSizeInBytes))
-                .baseUrl(exportFilesUrl).build().get()
+        return createWebClient(exportFilesUrl).get()
                 .exchangeToMono(clientResponse -> {
                     if (clientResponse.statusCode().is2xxSuccessful()) {
                         if (HttpStatus.OK.equals(clientResponse.statusCode())) {
